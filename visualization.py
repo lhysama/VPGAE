@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import networkx as nx
 import random
 
 from sklearn.cluster import KMeans, MeanShift, estimate_bandwidth
@@ -44,8 +43,6 @@ def PCAVisualization(embedding,partition):
 	plt.show()
 
 def nxVisualization(partition,label_adj):
-	G = nx.Graph()
-
 	attr_color = dict()
 	color_list = []
 
