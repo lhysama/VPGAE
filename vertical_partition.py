@@ -58,7 +58,6 @@ def usage_matrix_to_affinity_matrix(usage_matrix):
 
 # loss function
 def my_loss(output,label_x):
-	# 获得均方误差对象
 	mse = nn.MSELoss()
 	loss = mse(output,label_x)
 
