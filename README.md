@@ -1,4 +1,4 @@
-# VPGAE:
+# VPGAE
 
 ## Introduction
 
