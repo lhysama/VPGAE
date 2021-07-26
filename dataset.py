@@ -77,10 +77,9 @@ def tpch_workload(scaleFactor):
 	return [customer,lineitem,orders,supplier,part,partsupp,nation,region]
 	# return [lineitem]
 
-def HAP():
+def HAP(queries_number):
 	selectivity = 0.3
 	projectivity = 16
-	queries_number = 20
 	attribute_number = 160
 	
 	workload = []
