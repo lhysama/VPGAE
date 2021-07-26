@@ -155,21 +155,41 @@ def beam_search(embedding,workload,origin_candidate_length,beam_search_width):
 	candidates = candidates[:origin_candidate_length]
 	
 	# start beam search
-	if beam_search_width > 1: # if beam_search_width is greater than 1, we need a list to record intermediate results	
-		while True:
-			all_candidates = []
-			for candidate in candidates:
-				partitioning_scheme = candidate[0]
+	while True:
+		all_candidates = []
+		for candidate in candidates:
+			partitioning_scheme = candidate[0]
+			# merge two partitions
+			for i in range(len(partitioning_scheme)-1):
+				for j in range(i+1,len(partitioning_scheme)):
+					temp_partitioning_scheme = copy.deepcopy(partitioning_scheme)
+					temp_partitioning_scheme.remove(partitioning_scheme[i])
+					temp_partitioning_scheme.remove(partitioning_scheme[j])
+					temp_partitioning_scheme.append(partitioning_scheme[i]+partitioning_scheme[j])
+					
+					temp_cost = my_cost_model.calculate_cost_fair(temp_partitioning_scheme,workload)
+					
+					if temp_cost < best_cost:
+						if len(all_candidates) < beam_search_width:
+							all_candidates.append([temp_partitioning_scheme,temp_cost])
+							all_candidates.sort(key = lambda tup:tup[1])
+						else:
+							if temp_cost < all_candidates[beam_search_width-1][1]:
+								all_candidates.remove(all_candidates[beam_search_width-1])
+								all_candidates.append([temp_partitioning_scheme,temp_cost])
+								all_candidates.sort(key = lambda tup:tup[1])
 
-				# merge two partitions
-				for i in range(len(partitioning_scheme)-1):
-					for j in range(i+1,len(partitioning_scheme)):
+			# split a partition that includes more than 2 attributes
+			for i in range(len(partitioning_scheme)):
+				if len(partitioning_scheme[i]) > 1:
+					for j in range(1,len(partitioning_scheme[i])):
 						temp_partitioning_scheme = copy.deepcopy(partitioning_scheme)
 						temp_partitioning_scheme.remove(partitioning_scheme[i])
-						temp_partitioning_scheme.remove(partitioning_scheme[j])
-						temp_partitioning_scheme.append(partitioning_scheme[i]+partitioning_scheme[j])
-
+						temp_partitioning_scheme.append(partitioning_scheme[i][0:j])
+						temp_partitioning_scheme.append(partitioning_scheme[i][j:len(partitioning_scheme[i])])
+						
 						temp_cost = my_cost_model.calculate_cost_fair(temp_partitioning_scheme,workload)
+					
 						if temp_cost < best_cost:
 							if len(all_candidates) < beam_search_width:
 								all_candidates.append([temp_partitioning_scheme,temp_cost])
@@ -180,75 +200,15 @@ def beam_search(embedding,workload,origin_candidate_length,beam_search_width):
 									all_candidates.append([temp_partitioning_scheme,temp_cost])
 									all_candidates.sort(key = lambda tup:tup[1])
 
-				# split a partition that includes more than 2 attributes
-				for i in range(len(partitioning_scheme)):
-					if len(partitioning_scheme[i]) > 1:
-						for j in range(1,len(partitioning_scheme[i])):
-							temp_partitioning_scheme = copy.deepcopy(partitioning_scheme)
-							temp_partitioning_scheme.remove(partitioning_scheme[i])
-							temp_partitioning_scheme.append(partitioning_scheme[i][0:j])
-							temp_partitioning_scheme.append(partitioning_scheme[i][j:len(partitioning_scheme[i])])
-							temp_cost = my_cost_model.calculate_cost_fair(temp_partitioning_scheme,workload)
-						
-							if temp_cost < best_cost:
-								if len(all_candidates) < beam_search_width:
-									all_candidates.append([temp_partitioning_scheme,temp_cost])
-									all_candidates.sort(key = lambda tup:tup[1])
-								else:
-									if temp_cost < all_candidates[beam_search_width-1][1]:
-										all_candidates.remove(all_candidates[beam_search_width-1])
-										all_candidates.append([temp_partitioning_scheme,temp_cost])
-										all_candidates.sort(key = lambda tup:tup[1])
-
-			if len(all_candidates) == 0:
-				break
-			
-			if all_candidates[0][1] < best_cost:
-				best_cost = all_candidates[0][1]
-				best_partitioning_scheme = all_candidates[0][0]
-				candidates = all_candidates
-			else:
-				break
-				
-	else: #  if beam_search_width is equal to 1, we only need update the best partitioning scheme	
-		while True:
-			flag = False
-			for candidate in candidates:
-				partitioning_scheme = candidate[0]
-				# merge two partitions
-				for i in range(len(partitioning_scheme)-1):
-					for j in range(i+1,len(partitioning_scheme)):
-						temp_partitioning_scheme = copy.deepcopy(partitioning_scheme)
-						temp_partitioning_scheme.remove(partitioning_scheme[i])
-						temp_partitioning_scheme.remove(partitioning_scheme[j])
-						temp_partitioning_scheme.append(partitioning_scheme[i]+partitioning_scheme[j])
-						
-						temp_cost = my_cost_model.calculate_cost_fair(temp_partitioning_scheme,workload)
-						if temp_cost < best_cost:
-							best_cost = temp_cost
-							best_partitioning_scheme = temp_partitioning_scheme
-							flag = True
-
-				# split a partition that includes more than 2 attributes
-				for i in range(len(partitioning_scheme)):
-					if len(partitioning_scheme[i]) > 1:
-						for j in range(1,len(partitioning_scheme[i])):
-							temp_partitioning_scheme = copy.deepcopy(partitioning_scheme)
-							temp_partitioning_scheme.remove(partitioning_scheme[i])
-							temp_partitioning_scheme.append(partitioning_scheme[i][0:j])
-							temp_partitioning_scheme.append(partitioning_scheme[i][j:len(partitioning_scheme[i])])
-
-							temp_cost = my_cost_model.calculate_cost_fair(temp_partitioning_scheme,workload)
-							if temp_cost < best_cost:
-								best_cost = temp_cost
-								best_partitioning_scheme = temp_partitioning_scheme
-								flag = True
-			
-			if flag:
-				candidates = [[best_partitioning_scheme,best_cost]]
-			else:
-				break
-
+		if len(all_candidates) == 0:
+			break
+		
+		if all_candidates[0][1] < best_cost:
+			best_cost = all_candidates[0][1]
+			best_partitioning_scheme = all_candidates[0][0]
+			candidates = all_candidates
+		else:
+			break
 	
 	return best_cost,best_partitioning_scheme
 
@@ -343,7 +303,7 @@ class Workload():
 		else:
 			self.cardinality = None
 
-def main(data,n_hid,n_dim,tablename,origin_candidate_length, beam_search_width,k):
+def main(data,n_hid,n_dim,tablename,origin_candidate_length, beam_search_width,k,exp_name,use_OPTIMAL):
 	workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
 	# adjacent matrix of workload
 	adj = workload.affnity_matrix
@@ -436,17 +396,22 @@ def main(data,n_hid,n_dim,tablename,origin_candidate_length, beam_search_width,k
 	hill_cost,hill_partitions = hill_climb_optim(workload)
 	t5 = time.time()
 
-	# optimal_cost,optimal_partitions = optimal(workload)
+	# Using OPTIMAL method may lead to unreasonable execution time
+	if use_OPTIMAL:
+		optimal_cost,optimal_partitions = optimal(workload)
+		print("OPTIMAL cost:",optimal_cost)
 
 	column_cost,column_partitions = column(workload)
 	# print(column_cost)
 	row_cost, row_partitions = row(workload)
 	
-	# return beam_cost,kmeans_cost,hill_cost,column_cost,t3-t2+gae_time,t4-t3+gae_time,t5-t4
-	return beam_cost,kmeans_cost,hill_cost,beam_partitions,workload
+	if exp_name == "TPC-H":
+		return beam_cost,kmeans_cost,hill_cost,column_cost,row_cost,beam_partitions,kmeans_partitions,hill_partitions,column_partitions,row_partitions,workload
+	else:
+		return beam_cost,kmeans_cost,hill_cost,column_cost,t3-t2+gae_time,t4-t3+gae_time,t5-t4
 
 '''
-# random dataset experients
+# random dataset experiments
 if __name__ == "__main__":
 	attributes_num = [150]
 	for a_num in attributes_num:
@@ -466,7 +431,7 @@ if __name__ == "__main__":
 		
 		for i,data in enumerate(dataset_):
 			reset_seed()
-			beam_cost,kmeans_cost,hill_cost,column_cost,beam_time,kmeans_time,hill_time = main(data,64,32,"random dataset",3,1,3)
+			beam_cost,kmeans_cost,hill_cost,column_cost,beam_time,kmeans_time,hill_time = main(data,64,32,"random dataset",3,1,3,"random_dataset",False)
 			
 			beam_costs.append(beam_cost)
 			kmeans_costs.append(kmeans_cost)
@@ -476,61 +441,84 @@ if __name__ == "__main__":
 			beam_times.append(beam_time)
 			kmeans_times.append(kmeans_time)
 			hill_times.append(hill_time)
-		print("avg beam_costs:{}".format(np.mean(beam_costs)))
-		print("avg kmeans_costs:{}".format(np.mean(kmeans_costs)))
-		print("avg hill_costs:{}".format(np.mean(hill_costs)))
-		print("avg column_costs:{}".format(np.mean(column_costs)))
+
+		print("Avg. VPGAE-B cost:{}".format(np.mean(beam_costs)))
+		print("Avg. VPGAE cost:{}".format(np.mean(kmeans_costs)))
+		print("Avg. HILLCLIMB cost:{}".format(np.mean(hill_costs)))
+		print("Avg. COLUMN cost:{}".format(np.mean(column_costs)))
 		
-		print("avg beam_times:{}".format(np.mean(beam_times)))
-		print("avg kmeans_times:{}".format(np.mean(kmeans_times)))
-		print("avg hill_times:{}".format(np.mean(hill_times)))
+		print("Avg. VPGAE-B time:{}".format(np.mean(beam_times)))
+		print("Avg. VPGAE time:{}".format(np.mean(kmeans_times)))
+		print("Avg. HILLCLIMB time:{}".format(np.mean(hill_times)))
 
 		print("--------------------")
 '''
 
 
-# TPC-H experients
+# TPC-H experiments
 if __name__ == "__main__":
 	dataset_ = dataset.tpch_workload(10)
 	table_name = ["customer","lineitem","orders","supplier","part","partsupp","nation","region"]
 	beam_costs = []
 	kmeans_costs = []
 	hill_costs = []
-	partitioning_scheme_list = []
+	column_costs = []
+	row_costs = []
+
+	beam_partitions_list = []
+	kmeans_partitions_list = []
+	hill_partitions_list = []
+	column_partitions_list = []
+	row_partitions_list = []
 	workload_list = []
 
 	for i,data in enumerate(dataset_):
 		reset_seed()
-		beam_cost, kmeans_cost, hill_cost, ps, workload  = main(data,4,16,table_name[i],3,3,3)
+		beam_cost, kmeans_cost, hill_cost,column_cost,row_cost,beam_partitions,kmeans_partitions,hill_partitions,column_partitions,row_partitions, workload  = main(data,4,16,table_name[i],3,3,3,"TPC-H",False)
 		
 		beam_costs.append(beam_cost)
 		kmeans_costs.append(kmeans_cost)
 		hill_costs.append(hill_cost)
-		partitioning_scheme_list.append(ps)
+		column_costs.append(column_cost)
+		row_costs.append(row_cost)
+
+		beam_partitions_list.append(beam_partitions)
+		kmeans_partitions_list.append(kmeans_partitions)
+		hill_partitions_list.append(hill_partitions)
+		column_partitions_list.append(column_partitions)
+		row_partitions_list.append(row_partitions)
 		workload_list.append(workload)
 	
-	print(beam_costs)
-	print(kmeans_costs)
-	print(hill_costs)
-	# print(partitioning_scheme_list)
+	print("VPGAE-B costs on 8 tables:", beam_costs)
+	print("VPGAE costs on 8 tables:", kmeans_costs)
+	print("HILLCLIMB costs on 8 tables:", hill_costs)
+	print("COLUMN costs on 8 tables:", column_costs)
+	print("ROW costs on 8 tables:", row_costs)
+	
+	print("Unnecessary data read of VPGAE-B:", fraction_of_unnecessary_data_read(beam_partitions_list, workload_list))
+	print("Unnecessary data read of VPGAE:", fraction_of_unnecessary_data_read(kmeans_partitions_list, workload_list))
+	print("Unnecessary data read of HILLCLIMB:", fraction_of_unnecessary_data_read(hill_partitions_list, workload_list))
+	print("Unnecessary data read of COLUMN:", fraction_of_unnecessary_data_read(column_partitions_list, workload_list))
+	print("Unnecessary data read of ROW:", fraction_of_unnecessary_data_read(row_partitions_list, workload_list))
 
-	print(fraction_of_unnecessary_data_read(partitioning_scheme_list, workload_list))
-
-	join_number_list = number_of_joins(partitioning_scheme_list, workload_list)
-	print(join_number_list)
-	print(np.sum(join_number_list))
+	column_RJ = np.sum(number_of_joins(column_partitions_list, workload_list))
+	print("normalized reconstruction joins of VPGAE-B:", np.sum(number_of_joins(beam_partitions_list, workload_list))/column_RJ)
+	print("normalized reconstruction joins of VPGAE:", np.sum(number_of_joins(kmeans_partitions_list, workload_list))/column_RJ)
+	print("normalized reconstruction joins of HILLCLIMB:", np.sum(number_of_joins(hill_partitions_list, workload_list))/column_RJ)
+	print("normalized reconstruction joins of COLUMN:", column_RJ/column_RJ)
+	print("normalized reconstruction joins of ROW:", np.sum(number_of_joins(row_partitions_list, workload_list))/column_RJ)
 
 	print("--------------------")
 
 
 '''
-# workload size experients
+# workload size experiments
 if __name__ == "__main__":
 	data = dataset.lineitem(10)
 	reset_seed()
 	
 	print("workload size = 17")
-	beam_cost,kmeans_cost,hill_cost,column_cost,beam_time,kmeans_time,hill_time = main(data,4,16,"lineitem",3,3,5)
+	beam_cost,kmeans_cost,hill_cost,column_cost,beam_time,kmeans_time,hill_time = main(data,4,16,"lineitem",3,3,5,"workload_size",False)
 	print("VPGAE-B: ",beam_cost)
 	print("VPGAE: ", kmeans_cost)
 	print("HILLCLIMB: ", hill_cost)
@@ -541,7 +529,7 @@ if __name__ == "__main__":
 		reset_seed()
 		data[3][16-i] = 0
 		# print(data[3])
-		beam_cost,kmeans_cost,hill_cost,column_cost,beam_time,kmeans_time,hill_time = main(data,4,16,"lineitem",3,3,5)
+		beam_cost,kmeans_cost,hill_cost,column_cost,beam_time,kmeans_time,hill_time = main(data,4,16,"lineitem",3,3,5,"workload_size",False)
 		
 		print("VPGAE-B: ",beam_cost)
 		print("VPGAE: ", kmeans_cost)
@@ -551,26 +539,20 @@ if __name__ == "__main__":
 '''
 
 '''
-# HAP benchmark
+# HAP benchmark experiments
 if __name__ == "__main__":
-	data = dataset.HAP()
+	data = dataset.HAP(10)
 	table_name = ["HAP"]
-	beam_costs = []
-	kmeans_costs = []
-	hill_costs = []
-	
-	reset_seed()
-	beam_cost,kmeans_cost,hill_cost,column_cost,beam_time,kmeans_time,hill_time = main(data,32,64,table_name[0],3,1,3)
-		
-	beam_costs.append(beam_cost)
-	kmeans_costs.append(kmeans_cost)
-	hill_costs.append(hill_cost)
-		
-	print(beam_costs)
-	print(kmeans_costs)
-	print(hill_costs)
 
-	print(beam_time,kmeans_time,hill_time)
+	reset_seed()
+	beam_cost,kmeans_cost,hill_cost,column_cost,beam_time,kmeans_time,hill_time = main(data,32,128,table_name[0],10,1,6,"HAP",False)
+
+	print("VPGAE-B cost on HAP wide table:",beam_cost)
+	print("VPGAE cost on HAP wide table",kmeans_cost)
+	print("HILLCLIMB cost on HAP wide table",hill_cost)
+	print("COLUMN costs on HAP wide table",column_cost)
+
+	print("VPGAE-B time:{}, VPGAE time:{}, HILLCLIMB time:{}".format(beam_time,kmeans_time,hill_time))
 
 	print("--------------------")
 '''
