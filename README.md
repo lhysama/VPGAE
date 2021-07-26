@@ -1,4 +1,4 @@
-# VPGAE
+# Learning Vertical Partitions with Graph AutoEncoder
 
 ## Introduction
 
