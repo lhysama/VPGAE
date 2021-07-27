@@ -541,18 +541,19 @@ if __name__ == "__main__":
 '''
 # HAP benchmark experiments
 if __name__ == "__main__":
-	data = dataset.HAP(10)
-	table_name = ["HAP"]
+	for i in range(10):
+		data = dataset.HAP(20)
+		table_name = ["HAP"]
 
-	reset_seed()
-	beam_cost,kmeans_cost,hill_cost,column_cost,beam_time,kmeans_time,hill_time = main(data,32,128,table_name[0],10,1,6,"HAP",False)
+		reset_seed()
+		beam_cost,kmeans_cost,hill_cost,column_cost,beam_time,kmeans_time,hill_time = main(data,128,32,table_name[0],5,1,3,"HAP",False)
 
-	print("VPGAE-B cost on HAP wide table:",beam_cost)
-	print("VPGAE cost on HAP wide table",kmeans_cost)
-	print("HILLCLIMB cost on HAP wide table",hill_cost)
-	print("COLUMN costs on HAP wide table",column_cost)
+		print("VPGAE-B cost on HAP wide table:",beam_cost)
+		print("VPGAE cost on HAP wide table",kmeans_cost)
+		print("HILLCLIMB cost on HAP wide table",hill_cost)
+		print("COLUMN costs on HAP wide table",column_cost)
 
-	print("VPGAE-B time:{}, VPGAE time:{}, HILLCLIMB time:{}".format(beam_time,kmeans_time,hill_time))
+		print("VPGAE-B time:{}, VPGAE time:{}, HILLCLIMB time:{}".format(beam_time,kmeans_time,hill_time))
 
-	print("--------------------")
+		print("--------------------")
 '''
