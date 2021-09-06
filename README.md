@@ -84,7 +84,7 @@ By default, this program will run TPC-H benchmark experiments. You can open the 
 
 **(2)  Experimental results:**
 
-​	The experiments results on TPC-DS benchmark are shown in Table 1-4:
+​	The experiments results of estimated cost of baselines and our approaches on TPC-DS benchmark are shown in Table 1-4:
 
 Table 1:
 
@@ -137,6 +137,15 @@ Table 4:
 | O2P       |           |               |             |
 | ROW       | 2986      | 17949         | 153672      |
 | NAVATHE   |           |               |             |
+
+​	The unnecessary data read and normalized reconstruction joins of baselines and our approaches are shown in Table 5:
+
+Table 5:
+
+|                                 | VPGAE-B | HILLCLIMB | VPGAE  | HYRISE | COLUMN | O2P  | ROW    | NAVATHE |
+| ------------------------------- | ------- | --------- | ------ | ------ | ------ | ---- | ------ | ------- |
+| Unnecessary data read           | 11.48%  | 11.48%    | 9.49%  |        | 0%     |      | 77.47% |         |
+| Normalized reconstruction joins | 45.12%  | 45.12%    | 58.36% |        | 100%   |      | 0%     |         |
 
 **(3) Performance Analysis:**
 
