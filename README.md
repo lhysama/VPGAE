@@ -44,16 +44,16 @@ By default, this program will run TPC-H benchmark experiments. You can open the 
 
 ​	Note that we run all our experiments five times to get statistically meaningful results. Since NAVATHE spent more than 1 hour on generating partitioning scheme, we gave up the evaluation of this method:
 
-| Method    | Estimated cost | Workload run time (real cost) |      |      |      |
-| --------- | :------------: | :---------------------------: | ---- | ---- | ---- |
-| VPGAE-B   |     53804      |          1698.483 ms          |      |      |      |
-| HILLCLIMB |     53804      |          1767.468 ms          |      |      |      |
-| VPGAE     |     53844      |          1752.324 ms          |      |      |      |
-| HYRISE    |     53844      |          1876.993 ms          |      |      |      |
-| COLUMN    |     54491      |          2432.890 ms          |      |      |      |
-| O2P       |     55946      |          2489.374 ms          |      |      |      |
-| ROW       |     331812     |          6233.532 ms          |      |      |      |
-| NAVATHE   |     **-**      |             **-**             |      |      |      |
+| Method    | Estimated cost | Workload run time (real cost) |
+| --------- | :------------: | :---------------------------: |
+| VPGAE-B   |     53804      |          1698.483 ms          |
+| HILLCLIMB |     53804      |          1767.468 ms          |
+| VPGAE     |     53844      |          1752.324 ms          |
+| HYRISE    |     53844      |          1876.993 ms          |
+| COLUMN    |     54491      |          2432.890 ms          |
+| O2P       |     55946      |          2489.374 ms          |
+| ROW       |     331812     |          6233.532 ms          |
+| NAVATHE   |     **-**      |             **-**             |
 
 **(3) Performance Analysis**: 
 
@@ -67,10 +67,10 @@ By default, this program will run TPC-H benchmark experiments. You can open the 
 
 **(2) Experimental results**:
 
-| Method  | Estimated cost on dynamic workload | Estimated cost on static workload |      |      |      |
-| ------- | ---------------------------------- | --------------------------------- | ---- | ---- | ---- |
-| VPGAE-B | 38330                              | 49480                             |      |      |      |
-| VPGAE   | 38890                              | 49510                             |      |      |      |
+| Method  | Estimated cost on dynamic workload | Estimated cost on static workload |
+| ------- | ---------------------------------- | --------------------------------- |
+| VPGAE-B | 38330                              | 49480                             |
+| VPGAE   | 38890                              | 49510                             |
 
 **(3) Performance Analysis:** 
 
