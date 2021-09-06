@@ -8,6 +8,10 @@ def fraction_of_unnecessary_data_read(partitioning_scheme_list, dataset):
 		partition_scheme = partitioning_scheme_list[i]
 		workload = dataset[i]
 
+		# if a workload includes no query, just skip it.
+		if workload.query_num == 0:
+			continue
+
 		required_attributes = copy.deepcopy(workload.required_attributes)
 		partition_scheme = copy.deepcopy(partition_scheme)
 		data_need = data_read = 0
@@ -40,4 +44,7 @@ def fraction_of_unnecessary_data_read(partitioning_scheme_list, dataset):
 		all_data_read += data_read * workload.cardinality
 
 	# print(all_data_read)
-	return 1-(all_data_need/all_data_read)
+	if all_data_read == 0:
+		return None
+	else:
+		return 1-(all_data_need/all_data_read)

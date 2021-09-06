@@ -40,7 +40,7 @@ def clustered_index_scan_cost(selectivity,tuple_length):
 def calculate_cost_fair(partitioning_scheme,workload):
 	SYS_PARAM.cardinality = workload.cardinality
 	total_cost = 0
-	
+
 	required_attributes = copy.deepcopy(workload.required_attributes)
 	partitioning_scheme = copy.deepcopy(partitioning_scheme)
 	
