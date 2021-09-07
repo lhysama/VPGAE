@@ -34,13 +34,13 @@ By default, this program will run TPC-H benchmark experiments. You can open the 
 
 **(1) Experimental Settings**: 
 
-​	DBMS: PostgreSQL 11.2
+DBMS: PostgreSQL 11.2
 
-​	Dataset: Table W with 30 attributes and 100158 lines
+Dataset: Table W with 30 attributes and 100158 lines
 
-​	Workload: 26 queries generated from template “select ai,...,am from W”
+Workload: 26 queries generated from template “select ai,...,am from W”
 
-​	Methods: We use all baseline methods as well as our VPGAE and VPGAE-B to partition W vertically, execute the workload on the partitioned sub-tables, and record the actual execution time of the workload as the real cost. In order to eliminate interference factors such as cache, all experiments are repeated five times after the cache is hot, and the average execution time is taken as the final experimental result.
+Methods: We use all baseline methods as well as our VPGAE and VPGAE-B to partition W vertically, execute the workload on the partitioned sub-tables, and record the actual execution time of the workload as the real cost. In order to eliminate interference factors such as cache, all experiments are repeated five times after the cache is hot, and the average execution time is taken as the final experimental result.
 
 **(2) Experimental Results** (note: NAVATHE spent more than 1 hour on generating partitioning scheme, we gave up the evaluation of this method):
 
@@ -57,13 +57,13 @@ By default, this program will run TPC-H benchmark experiments. You can open the 
 
 **(3) Performance Analysis**: 
 
-​	The results show that the real cost trends are consistent with the estimated cost trends, i.e., methods with larger estimated cost are tend to have larger run time. And although VPGAE-B has the same estimated cost with HILLCLIMB, the real cost of VPGAE-B is smaller than HILLCLIMB, and the same phenomenon occurs between VPGAE and HYRISE. We analyzed the partitioning scheme of different methods and found that different schemes might have the same estimated cost. But VPGAE(-B) utilizes the valuable information from the affinity graph, leading to better partitioning scheme with less run time cost. This result indicates that our cost model is reasonable and our partitioning method is effective in reality. 
+The results show that the real cost trends are consistent with the estimated cost trends, i.e., methods with larger estimated cost are tend to have larger run time. And although VPGAE-B has the same estimated cost with HILLCLIMB, the real cost of VPGAE-B is smaller than HILLCLIMB, and the same phenomenon occurs between VPGAE and HYRISE. We analyzed the partitioning scheme of different methods and found that different schemes might have the same estimated cost. But VPGAE(-B) utilizes the valuable information from the affinity graph, leading to better partitioning scheme with less run time cost. This result indicates that our cost model is reasonable and our partitioning method is effective in reality. 
 
 ### 2.  Experiments results on Dynamic Workload:
 
 **(1) Experimental Settings**: 
 
-​	we first generate 100 queries on table W, and randomly divided them into 10 workloads evenly. Then we take the 10 workloads as streaming input into the partitioning algorithms and evaluate the estimated cost. We also treat all 100 queries as a static workload.
+We first generate 100 queries on table W, and randomly divided them into 10 workloads evenly. Then we take the 10 workloads as streaming input into the partitioning algorithms and evaluate the estimated cost. We also treat all 100 queries as a static workload.
 
 **(2) Experimental results**:
 
@@ -74,17 +74,17 @@ By default, this program will run TPC-H benchmark experiments. You can open the 
 
 **(3) Performance Analysis:** 
 
-​	The results show that both VPGAE and VPGAE-B fit dynamic workload well. Compared with static workload, VPGAE and VPGAE-B on dynamic workloads improves query performance by 27.31% and 29.09%, respectively. This verified that our proposed solution can adapt to workload changes well.
+The results show that both VPGAE and VPGAE-B fit dynamic workload well. Compared with static workload, VPGAE and VPGAE-B on dynamic workloads improves query performance by 27.31% and 29.09%, respectively. This verified that our proposed solution can adapt to workload changes well.
 
 ## 3.  Experiments results on TPC-DS benchmark:
 
 **(1) Experimental Settings:**
 
-​	We generate 1 GB TPC-DS data in **PostgreSQL 11.2** and select 26 template to generate queries. For each template, we only generate one query , and we treat those 26 queries as a workload.
+We generate 1 GB TPC-DS data in **PostgreSQL 11.2** and select 26 template to generate queries. For each template, we only generate one query , and we treat those 26 queries as a workload.
 
 **(2)  Experimental results:**
 
-​	The experiments results of estimated cost of baselines and our approaches on TPC-DS benchmark are shown in Table 1-4:
+The experiments results of estimated cost of baselines and our approaches on TPC-DS benchmark are shown in Table 1-4:
 
 Table 1:
 
@@ -138,7 +138,7 @@ Table 4:
 | ROW       | 2986      | 17949         | 153672      |
 | NAVATHE   |           |               |             |
 
-​	The unnecessary data read and normalized reconstruction joins of baselines and our approaches are shown in Table 5:
+The unnecessary data read and normalized reconstruction joins of baselines and our approaches are shown in Table 5:
 
 Table 5:
 
@@ -149,7 +149,7 @@ Table 5:
 
 **(3) Performance Analysis:**
 
-​	The results show that both VPGAE and VPGAE-B still maintain good performance when we extended the analysis to TPC-DS.
+The results show that both VPGAE and VPGAE-B still maintain good performance when we extended the analysis to TPC-DS.
 
 ## Implemented methods
 
