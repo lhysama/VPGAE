@@ -88,29 +88,29 @@ The experiments results of estimated cost of baselines and our approaches on TPC
 
 Table 1:
 
-| Method    | customer_address | customer_demographics | date_dim | warehouse | ship_mode | time_dim | reason |
-| --------- | ---------------- | --------------------- | -------- | --------- | --------- | -------- | ------ |
-| VPGAE-B   | 193              | 10792                 | 1007     | 2         | 2         | 43       | 1      |
-| HILLCLIMB | 193              | 10792                 | 1007     | 2         | 2         | 43       | 1      |
-| VPGAE     | 193              | 10836                 | 1007     | 2         | 2         | 43       | 1      |
-| HYRISE    | 193              | 11080                 | 1116     | 2         | 2         | 43       | 1      |
-| COLUMN    | 196              | 12208                 | 1300     | 4         | 4         | 68       | 2      |
-| O2P       | 222              | 11920                 | 1334     | 2         | 2         | 68       | 1      |
-| ROW       | 1092             | 19698                 | 5014     | 2         | 2         | 226      | 1      |
-| NAVATHE   | 222              | 11920                 | 1194     | 2         | 2         | 51       | 1      |
+| Method    | customer_address | customer_demographics | date_dim | warehouse | ship_mode |
+| --------- | ---------------- | --------------------- | -------- | --------- | --------- |
+| VPGAE-B   | 193              | 10792                 | 1007     | 2         | 2         |
+| HILLCLIMB | 193              | 10792                 | 1007     | 2         | 2         |
+| VPGAE     | 193              | 10836                 | 1007     | 2         | 2         |
+| HYRISE    | 193              | 11080                 | 1116     | 2         | 2         |
+| COLUMN    | 196              | 12208                 | 1300     | 4         | 4         |
+| O2P       | 222              | 11920                 | 1334     | 2         | 2         |
+| ROW       | 1092             | 19698                 | 5014     | 2         | 2         |
+| NAVATHE   | 222              | 11920                 | 1194     | 2         | 2         |
 
 Table 2:
 
-| Method    | income_band | item | store | call_center | customer | web_site | store_returns | household_demographics |
-| --------- | ----------- | ---- | ----- | ----------- | -------- | -------- | ------------- | ---------------------- |
-| VPGAE-B   | 1           | 743  | 13    | 2           | 944      | 1        | 198           | 35                     |
-| HILLCLIMB | 1           | 743  | 13    | 2           | 944      | 1        | 198           | 35                     |
-| VPGAE     | 1           | 750  | 13    | 2           | 944      | 1        | 198           | 35                     |
-| HYRISE    |             | 743  | 22    | 3           | 944      | 1        | 198           | 44                     |
-| COLUMN    | 3           | 759  | 26    | 6           | 1028     | 2        | 285           | 44                     |
-| O2P       | 2           | 764  | 14    | 3           | 984      | 1        | 226           | 41                     |
-| ROW       | 1           | 2899 | 13    | 2           | 4137     | 1        | 1432          | 49                     |
-| NAVATHE   | 1           | 755  | 13    | 2           | 984      | 1        | 198           | 41                     |
+| Method    | income_band | item | store | call_center | customer | web_site | household_demographics |
+| --------- | ----------- | ---- | ----- | ----------- | -------- | -------- | ---------------------- |
+| VPGAE-B   | 1           | 743  | 13    | 2           | 944      | 1        | 35                     |
+| HILLCLIMB | 1           | 743  | 13    | 2           | 944      | 1        | 35                     |
+| VPGAE     | 1           | 750  | 13    | 2           | 944      | 1        | 35                     |
+| HYRISE    |             | 743  | 22    | 3           | 944      | 1        | 44                     |
+| COLUMN    | 3           | 759  | 26    | 6           | 1028     | 2        | 44                     |
+| O2P       | 2           | 764  | 14    | 3           | 984      | 1        | 41                     |
+| ROW       | 1           | 2899 | 13    | 2           | 4137     | 1        | 49                     |
+| NAVATHE   | 1           | 755  | 13    | 2           | 984      | 1        | 41                     |
 
 Table 3:
 
@@ -127,16 +127,16 @@ Table 3:
 
 Table 4:
 
-| Method    | web_sales | catalog_sales | store_sales |
-| --------- | --------- | ------------- | ----------- |
-| VPGAE-B   | 422       | 3486          | 52287       |
-| HILLCLIMB | 422       | 3486          | 52287       |
-| VPGAE     | 422       | 3557          | 54956       |
-| HYRISE    |           |               |             |
-| COLUMN    | 705       | 4687          | 56940       |
-| O2P       |           |               |             |
-| ROW       | 2986      | 17949         | 153672      |
-| NAVATHE   |           |               |             |
+| Method    | web_sales | catalog_sales | store_sales | time_dim | reason | store_returns |
+| --------- | --------- | ------------- | ----------- | -------- | ------ | ------------- |
+| VPGAE-B   | 422       | 3486          | 52287       | 43       | 1      | 198           |
+| HILLCLIMB | 422       | 3486          | 52287       | 43       | 1      | 198           |
+| VPGAE     | 422       | 3557          | 54956       | 43       | 1      | 198           |
+| HYRISE    |           |               |             | 43       | 1      | 198           |
+| COLUMN    | 705       | 4687          | 56940       | 68       | 2      | 285           |
+| O2P       |           |               |             | 68       | 1      | 226           |
+| ROW       | 2986      | 17949         | 153672      | 226      | 1      | 1432          |
+| NAVATHE   |           |               |             | 51       | 1      | 198           |
 
 The unnecessary data read and normalized reconstruction joins of baselines and our approaches are shown in Table 5:
 
