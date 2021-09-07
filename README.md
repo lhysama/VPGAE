@@ -40,9 +40,9 @@ By default, this program will run TPC-H benchmark experiments. You can open the 
 
 ​	Workload: 26 queries generated from template “select ai,...,am from W”
 
-**(2) Experimental Results**:
+​	Methods: We use all baseline methods as well as our VPGAE and VPGAE-B to partition W vertically, execute the workload on the partitioned sub-tables, and record the actual execution time of the workload as the real cost. In order to eliminate interference factors such as cache, all experiments are repeated five times after the cache is hot, and the average execution time is taken as the final experimental result.
 
-​	Note that we run all our experiments five times to get statistically meaningful results. Since NAVATHE spent more than 1 hour on generating partitioning scheme, we gave up the evaluation of this method:
+**(2) Experimental Results** (note: NAVATHE spent more than 1 hour on generating partitioning scheme, we gave up the evaluation of this method):
 
 | Method    | Estimated cost | Workload run time (real cost) |
 | --------- | :------------: | :---------------------------: |
@@ -93,11 +93,11 @@ Table 1:
 | VPGAE-B   | 193              | 10792                 | 1007     | 2         | 2         | 43       | 1      |
 | HILLCLIMB | 193              | 10792                 | 1007     | 2         | 2         | 43       | 1      |
 | VPGAE     | 193              | 10836                 | 1007     | 2         | 2         | 43       | 1      |
-| HYRISE    |                  |                       |          |           |           |          |        |
+| HYRISE    | 193              | 11080                 | 1116     | 2         | 2         | 43       | 1      |
 | COLUMN    | 196              | 12208                 | 1300     | 4         | 4         | 68       | 2      |
-| O2P       |                  |                       |          |           |           |          |        |
+| O2P       | 222              | 11920                 | 1334     | 2         | 2         | 68       | 1      |
 | ROW       | 1092             | 19698                 | 5014     | 2         | 2         | 226      | 1      |
-| NAVATHE   |                  |                       |          |           |           |          |        |
+| NAVATHE   | 222              | 11920                 | 1194     | 2         | 2         | 51       | 1      |
 
 Table 2:
 
@@ -106,11 +106,11 @@ Table 2:
 | VPGAE-B   | 1           | 743  | 13    | 2           | 944      | 1        | 198           | 35                     |
 | HILLCLIMB | 1           | 743  | 13    | 2           | 944      | 1        | 198           | 35                     |
 | VPGAE     | 1           | 750  | 13    | 2           | 944      | 1        | 198           | 35                     |
-| HYRISE    |             |      |       |             |          |          |               |                        |
+| HYRISE    |             | 743  | 22    | 3           | 944      | 1        | 198           | 44                     |
 | COLUMN    | 3           | 759  | 26    | 6           | 1028     | 2        | 285           | 44                     |
-| O2P       |             |      |       |             |          |          |               |                        |
+| O2P       | 2           | 764  | 14    | 3           | 984      | 1        | 226           | 41                     |
 | ROW       | 1           | 2899 | 13    | 2           | 4137     | 1        | 1432          | 49                     |
-| NAVATHE   |             |      |       |             |          |          |               |                        |
+| NAVATHE   | 1           | 755  | 13    | 2           | 984      | 1        | 198           | 41                     |
 
 Table 3:
 
@@ -119,11 +119,11 @@ Table 3:
 | VPGAE-B   | 0        | 2         | 0            | 4588      | 78              | 0           |
 | HILLCLIMB | 0        | 2         | 0            | 4588      | 78              | 0           |
 | VPGAE     | 0        | 2         | 0            | 4588      | 78              | 0           |
-| HYRISE    |          |           |              |           |                 |             |
-| COLUMN    | 3        | 759       | 26           | 6         | 1028            | 2           |
-| O2P       |          |           |              |           |                 |             |
-| ROW       | 1        | 2899      | 13           | 2         | 4137            | 1           |
-| NAVATHE   |          |           |              |           |                 |             |
+| HYRISE    | 0        | 2         | 0            | 4588      | 78              | 0           |
+| COLUMN    | 0        | 6         | 0            | 6882      | 123             | 0           |
+| O2P       | 0        | 4         | 0            | 4588      | 93              | 0           |
+| ROW       | 0        | 4         | 0            | 5735      | 458             | 0           |
+| NAVATHE   | 0        | 4         | 0            | 4588      | 93              | 0           |
 
 Table 4:
 
@@ -149,7 +149,7 @@ Table 5:
 
 **(3) Performance Analysis:**
 
-​	The results show that both VPGAE and VPGAE-B still maintain good performance when we extend the analysis to TPC-DS.
+​	The results show that both VPGAE and VPGAE-B still maintain good performance when we extended the analysis to TPC-DS.
 
 ## Implemented methods
 
