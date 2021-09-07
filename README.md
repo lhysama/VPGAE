@@ -101,16 +101,16 @@ Table 1:
 
 Table 2:
 
-| Method    | income_band | item | store | call_center | customer | web_site | household_demographics |
-| --------- | ----------- | ---- | ----- | ----------- | -------- | -------- | ---------------------- |
-| VPGAE-B   | 1           | 743  | 13    | 2           | 944      | 1        | 35                     |
-| HILLCLIMB | 1           | 743  | 13    | 2           | 944      | 1        | 35                     |
-| VPGAE     | 1           | 750  | 13    | 2           | 944      | 1        | 35                     |
-| HYRISE    |             | 743  | 22    | 3           | 944      | 1        | 44                     |
-| COLUMN    | 3           | 759  | 26    | 6           | 1028     | 2        | 44                     |
-| O2P       | 2           | 764  | 14    | 3           | 984      | 1        | 41                     |
-| ROW       | 1           | 2899 | 13    | 2           | 4137     | 1        | 49                     |
-| NAVATHE   | 1           | 755  | 13    | 2           | 984      | 1        | 41                     |
+| Method    | income_band | item | call_center | customer | web_site | household_demographics |
+| --------- | ----------- | ---- | ----------- | -------- | -------- | ---------------------- |
+| VPGAE-B   | 1           | 743  | 2           | 944      | 1        | 35                     |
+| HILLCLIMB | 1           | 743  | 2           | 944      | 1        | 35                     |
+| VPGAE     | 1           | 750  | 2           | 944      | 1        | 35                     |
+| HYRISE    |             | 743  | 3           | 944      | 1        | 44                     |
+| COLUMN    | 3           | 759  | 6           | 1028     | 2        | 44                     |
+| O2P       | 2           | 764  | 3           | 984      | 1        | 41                     |
+| ROW       | 1           | 2899 | 2           | 4137     | 1        | 49                     |
+| NAVATHE   | 1           | 755  | 2           | 984      | 1        | 41                     |
 
 Table 3:
 
@@ -127,16 +127,16 @@ Table 3:
 
 Table 4:
 
-| Method    | web_sales | catalog_sales | store_sales | time_dim | reason | store_returns |
-| --------- | --------- | ------------- | ----------- | -------- | ------ | ------------- |
-| VPGAE-B   | 422       | 3486          | 52287       | 43       | 1      | 198           |
-| HILLCLIMB | 422       | 3486          | 52287       | 43       | 1      | 198           |
-| VPGAE     | 422       | 3557          | 54956       | 43       | 1      | 198           |
-| HYRISE    |           |               |             | 43       | 1      | 198           |
-| COLUMN    | 705       | 4687          | 56940       | 68       | 2      | 285           |
-| O2P       |           |               |             | 68       | 1      | 226           |
-| ROW       | 2986      | 17949         | 153672      | 226      | 1      | 1432          |
-| NAVATHE   |           |               |             | 51       | 1      | 198           |
+| Method    | web_sales | catalog_sales | store_sales | time_dim | reason | store_returns | store |
+| --------- | --------- | ------------- | ----------- | -------- | ------ | ------------- | ----- |
+| VPGAE-B   | 422       | 3486          | 52287       | 43       | 1      | 198           | 13    |
+| HILLCLIMB | 422       | 3486          | 52287       | 43       | 1      | 198           | 13    |
+| VPGAE     | 422       | 3557          | 54956       | 43       | 1      | 198           | 13    |
+| HYRISE    |           |               |             | 43       | 1      | 198           | 22    |
+| COLUMN    | 705       | 4687          | 56940       | 68       | 2      | 285           | 26    |
+| O2P       |           |               |             | 68       | 1      | 226           | 14    |
+| ROW       | 2986      | 17949         | 153672      | 226      | 1      | 1432          | 13    |
+| NAVATHE   |           |               |             | 51       | 1      | 198           | 13    |
 
 The unnecessary data read and normalized reconstruction joins of baselines and our approaches are shown in Table 5:
 
