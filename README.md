@@ -63,18 +63,18 @@ The results show that the real cost trends are consistent with the estimated cos
 
 **(1) Experimental Settings**: 
 
-We first generate 100 queries on table W, and randomly divided them into 10 workloads evenly. Then we take the 10 workloads as streaming input into the partitioning algorithms and evaluate the estimated cost. We also treat all 100 queries as a static workload.
+We first generate 150 queries on table W, and divided them into 15 workloads evenly. Then we take the 15 workloads as streaming input into the partitioning algorithms and evaluate the estimated cost. We also treat all 150 queries as a static workload.
 
 **(2) Experimental results**:
 
 | Method  | Estimated cost on dynamic workload | Estimated cost on static workload |
 | ------- | ---------------------------------- | --------------------------------- |
 | VPGAE-B | 38330                              | 49480                             |
-| VPGAE   | 38890                              | 49510                             |
+| VPGAE   | 38890                              | 49640                             |
 
 **(3) Performance Analysis:** 
 
-The results show that both VPGAE and VPGAE-B fit dynamic workload well. Compared with static workload, VPGAE and VPGAE-B on dynamic workloads improves query performance by 27.31% and 29.09%, respectively. This verified that our proposed solution can adapt to workload changes well.
+The results show that both VPGAE and VPGAE-B fit dynamic workload well. Compared with static workload, VPGAE and VPGAE-B on dynamic workloads improves query performance by 27.64% (not the 27.31% mentioned in the feedback) and 29.09%, respectively. This verified that our proposed solution can adapt to workload changes well.
 
 ## 3.  Experiments results on TPC-DS benchmark:
 
@@ -106,7 +106,7 @@ Table 2:
 | VPGAE-B   | 1           | 743  | 2           | 944      | 1        | 35                     |
 | HILLCLIMB | 1           | 743  | 2           | 944      | 1        | 35                     |
 | VPGAE     | 1           | 750  | 2           | 944      | 1        | 35                     |
-| HYRISE    |             | 743  | 3           | 944      | 1        | 44                     |
+| HYRISE    | 1           | 743  | 3           | 944      | 1        | 44                     |
 | COLUMN    | 3           | 759  | 6           | 1028     | 2        | 44                     |
 | O2P       | 2           | 764  | 3           | 984      | 1        | 41                     |
 | ROW       | 1           | 2899 | 2           | 4137     | 1        | 49                     |
@@ -125,18 +125,18 @@ Table 3:
 | ROW       | 0        | 4         | 0            | 5735      | 458             | 0           |
 | NAVATHE   | 0        | 4         | 0            | 4588      | 93              | 0           |
 
-Table 4:
+Table 4 (NAVATHE needs more than 3 hours to generate partitioning scheme on web_sales and catalog_sales tables):
 
 | Method    | web_sales | catalog_sales | store_sales | time_dim | reason | store_returns | store |
 | --------- | --------- | ------------- | ----------- | -------- | ------ | ------------- | ----- |
 | VPGAE-B   | 422       | 3486          | 52287       | 43       | 1      | 198           | 13    |
 | HILLCLIMB | 422       | 3486          | 52287       | 43       | 1      | 198           | 13    |
 | VPGAE     | 422       | 3557          | 54956       | 43       | 1      | 198           | 13    |
-| HYRISE    |           |               |             | 43       | 1      | 198           | 22    |
+| HYRISE    | 422       | 3486          | 55525       | 43       | 1      | 198           | 22    |
 | COLUMN    | 705       | 4687          | 56940       | 68       | 2      | 285           | 26    |
-| O2P       |           |               |             | 68       | 1      | 226           | 14    |
+| O2P       | 705       | 4192          | 57075       | 68       | 1      | 226           | 14    |
 | ROW       | 2986      | 17949         | 153672      | 226      | 1      | 1432          | 13    |
-| NAVATHE   |           |               |             | 51       | 1      | 198           | 13    |
+| NAVATHE   | -         | -             | 55805       | 51       | 1      | 198           | 13    |
 
 The unnecessary data read and normalized reconstruction joins of baselines and our approaches are shown in Table 5:
 
