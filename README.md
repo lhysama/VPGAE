@@ -70,11 +70,11 @@ We first generate 150 queries on table W, and divided them into 15 workloads eve
 | Method  | Estimated cost on dynamic workload | Estimated cost on static workload |
 | ------- | ---------------------------------- | --------------------------------- |
 | VPGAE-B | 38330                              | 49480                             |
-| VPGAE   | 38890                              | 49640                             |
+| VPGAE   | 38890                              | 49510                             |
 
 **(3) Performance Analysis:** 
 
-The results show that both VPGAE and VPGAE-B fit dynamic workload well. Compared with static workload, VPGAE and VPGAE-B on dynamic workloads improves query performance by 27.64% (not the 27.31% mentioned in the feedback) and 29.09%, respectively. This verified that our proposed solution can adapt to workload changes well.
+The results show that both VPGAE and VPGAE-B fit dynamic workload well. Compared with static workload, VPGAE and VPGAE-B on dynamic workloads improves query performance by 27.31% and 29.09%, respectively. This verified that our proposed solution can adapt to workload changes well.
 
 ## 3.  Experiments results on TPC-DS benchmark:
 
@@ -136,16 +136,16 @@ Table 4 (NAVATHE needs more than 3 hours to generate partitioning scheme on web_
 | COLUMN    | 705       | 4687          | 56940       | 68       | 2      | 285           | 26    |
 | O2P       | 705       | 4192          | 57075       | 68       | 1      | 226           | 14    |
 | ROW       | 2986      | 17949         | 153672      | 226      | 1      | 1432          | 13    |
-| NAVATHE   | -         | -             | 55805       | 51       | 1      | 198           | 13    |
+| NAVATHE   | -         | 3768          | 55805       | 51       | 1      | 198           | 13    |
 
 The unnecessary data read and normalized reconstruction joins of baselines and our approaches are shown in Table 5:
 
 Table 5:
 
-|                                 | VPGAE-B | HILLCLIMB | VPGAE  | HYRISE | COLUMN | O2P  | ROW    | NAVATHE |
-| ------------------------------- | ------- | --------- | ------ | ------ | ------ | ---- | ------ | ------- |
-| Unnecessary data read           | 11.48%  | 11.48%    | 9.49%  |        | 0%     |      | 77.47% |         |
-| Normalized reconstruction joins | 45.12%  | 45.12%    | 58.36% |        | 100%   |      | 0%     |         |
+|                                 | VPGAE-B | HILLCLIMB | VPGAE  | HYRISE | COLUMN | O2P    | ROW    | NAVATHE |
+| ------------------------------- | ------- | --------- | ------ | ------ | ------ | ------ | ------ | ------- |
+| Unnecessary data read           | 11.48%  | 11.48%    | 9.49%  | 3.4%   | 0%     | 7.13%  | 77.47% | -       |
+| Normalized reconstruction joins | 45.12%  | 45.12%    | 58.36% | 72.01% | 100%   | 78.02% | 0%     | -       |
 
 **(3) Performance Analysis:**
 
