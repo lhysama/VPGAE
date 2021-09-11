@@ -38,6 +38,7 @@ def beam_search(embedding,workload,origin_candidate_length,beam_search_width):
 	candidates = []
 	for k in range(1 , kmax+1):
 		if k != kmax:
+			print(k)
 			kmeans = KMeans(n_clusters = k).fit(embedding)
 			labels = kmeans.labels_
 		else:
@@ -134,6 +135,7 @@ def simple_kmeans_search(embedding,workload):
 
 	for k in range(1 , kmax+1):
 		if k != kmax:
+			print(k)
 			kmeans = KMeans(n_clusters = k).fit(embedding)
 			labels = kmeans.labels_
 		else:
