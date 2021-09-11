@@ -13,10 +13,9 @@ from unnecessary_data_read import fraction_of_unnecessary_data_read
 from reconstruction_joins import number_of_joins
 from workload_class import Workload
 
-'''
 # random dataset experiments
 if __name__ == "__main__":
-	attributes_num = [50]
+	attributes_num = [75]
 	for a_num in attributes_num:
 		print("tables have {} attributes.".format(a_num))
 		w_num = 100
@@ -34,13 +33,13 @@ if __name__ == "__main__":
 		for i,data in enumerate(dataset_):
 			workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
 			
-			t1=time.time()
-			beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload=workload,n_hid=64,n_dim=32,k=3,origin_candidate_length=3,beam_search_width=1)
-			beam_time=time.time()-t1
-			
 			t2=time.time()
 			kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE",workload=workload,n_hid=64,n_dim=32,k=3)
 			kmeans_time=time.time()-t2
+
+			t1=time.time()
+			beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload=workload,n_hid=64,n_dim=32,k=3,origin_candidate_length=3,beam_search_width=1)
+			beam_time=time.time()-t1
 
 			t3=time.time()
 			hill_cost, hill_partitions = hillclimb.partition(workload=workload)
@@ -67,10 +66,10 @@ if __name__ == "__main__":
 		print("Avg. HILLCLIMB time:{}".format(np.mean(hill_times)))
 
 		print("--------------------")
+
+
 '''
-
-
-# TPC-H experiments
+# TPC-H benchmark experiments
 if __name__ == "__main__":
 	dataset_ = dataset.tpch_workload(10)
 	beam_costs = []
@@ -129,10 +128,10 @@ if __name__ == "__main__":
 	print("normalized reconstruction joins of ROW:", np.sum(number_of_joins(row_partitions_list, workload_list))/column_RJ)
 
 	print("--------------------")
-
+'''
 
 '''
-# TPC-DS experiments
+# TPC-DS benchmark experiments
 if __name__ == "__main__":
 	dataset_ = dataset.tpcds_workload()
 	beam_costs = []
