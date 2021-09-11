@@ -46,7 +46,7 @@ if __name__ == "__main__":
 	time_interval_list = [random.random() for _ in range(len(query_datasets))]
 	query_arrive_time_list = []
 	query_finish_time_list = []
-	# initial threshold t = 2
+	# initialize threshold t = 2
 	t=2
 
 	for i in range(len(time_interval_list)):
@@ -61,37 +61,38 @@ if __name__ == "__main__":
 	st=time.time()
 	old_time = 0.0
 	finished_query_num = 0
-	# 假设表一开始是row layout
+	# Pressume that the table is Row layout at the beginning
 	partitioning_scheme = [[i+1 for i in range(static_data[1])]]
 
 	while(True):
 		current_time=time.time()-st
 		new_queries_are_submitted = False
-		# 找到old_time和current_time之间提交的所有queries，如果有，其加入current_query_list
+		# Add new queries to workload
 		for i in range(len(query_arrive_time_list)):
 			if old_time <= query_arrive_time_list[i] and query_arrive_time_list[i] < current_time:
 				current_query_list.append(query_datasets[i])
 				new_queries_are_submitted = True
 				print("query {} arrived.".format(i))
-		# 收集old_time和current_time之间所有已经完成的queries
+		# Collect finished queries
 		for i in range(len(query_finish_time_list)):
 			if old_time <= query_finish_time_list[i] and query_finish_time_list[i] < current_time:
 				finished_query_list.append(query_datasets[i])
 				print("query {} finished.".format(i))
 				finished_query_num += 1
-		# 如果所有query都执行完毕，跳出循环
+		# All queries are finished, break while
 		if finished_query_num == len(query_datasets):
 			break
 
-		# 有新的查询提交
+		# A new query is submitted
 		if new_queries_are_submitted:
 			current_workload = merge_queries2workload(current_query_list)
 			t = max(2,math.ceil(0.25*current_workload.query_num))
 			if my_cost_model.calculate_cost_fair(partitioning_scheme,current_workload)>my_cost_model.calculate_cost_fair(column.partition(current_workload)[1],current_workload):
 				_,partitioning_scheme = VPGAE.partition(algo_type="VPGAE-B",workload=current_workload,n_hid=32,n_dim=16,k=3,origin_candidate_length=3,beam_search_width=1)
-		# 完成的查询达到一定数量
+		
+		# When the length of finished_query_list is more than t, examine whether we have to update the partitioning scheme.
 		if len(finished_query_list) >= t:
-			# 从当前工作负载中移除已经完成的queries
+			# Remove finished queries from workload
 			for finished_query in finished_query_list:
 				for query in current_query_list:
 					if query == finished_query:
