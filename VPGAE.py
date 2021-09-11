@@ -37,13 +37,8 @@ def beam_search(embedding,workload,origin_candidate_length,beam_search_width):
 
 	candidates = []
 	for k in range(1 , kmax+1):
-		if k != kmax:
-			print(k)
-			kmeans = KMeans(n_clusters = k).fit(embedding)
-			labels = kmeans.labels_
-		else:
-			# fix bug when k = kmax 
-			labels = [j for j in range(kmax)]
+		kmeans = KMeans(n_clusters = k).fit(embedding)
+		labels = kmeans.labels_
 
 		label_max = max(labels)
 		partitioning_scheme = []
@@ -134,14 +129,7 @@ def simple_kmeans_search(embedding,workload):
 	best_partitioning_scheme = []
 
 	for k in range(1 , kmax+1):
-		if k != kmax:
-			print(k)
-			kmeans = KMeans(n_clusters = k).fit(embedding)
-			labels = kmeans.labels_
-		else:
-			# fix bug when k = kmax 
-			labels = [j for j in range(kmax)]
-		
+		kmeans = KMeans(n_clusters = k).fit(embedding)
 		labels = kmeans.labels_
 		
 		label_max = max(labels)
@@ -271,8 +259,8 @@ def partition(algo_type,workload,n_hid,n_dim,k,origin_candidate_length=None, bea
 	model.eval()
 	with torch.no_grad():
 		output,embedding = model(data)
-	embedding = embedding.numpy()
-
+	embedding = embedding.numpy().astype(np.float64)
+	
 	if algo_type == "VPGAE-B":
 		beam_cost,beam_partitions = beam_search(embedding, workload, origin_candidate_length, beam_search_width)
 		return beam_cost,beam_partitions
