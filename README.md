@@ -144,8 +144,8 @@ Table 5:
 
 |                                 | VPGAE-B | HILLCLIMB | VPGAE  | HYRISE | COLUMN | O2P    | ROW    | NAVATHE |
 | ------------------------------- | ------- | --------- | ------ | ------ | ------ | ------ | ------ | ------- |
-| Unnecessary data read           | 11.48%  | 11.48%    | 9.49%  | 3.4%   | 0%     | 7.13%  | 77.47% | -       |
-| Normalized reconstruction joins | 45.12%  | 45.12%    | 58.36% | 72.01% | 100%   | 78.02% | 0%     | -       |
+| Unnecessary data read           | 11.48%  | 11.48%    | 9.49%  | 3.4%   | 0%     | 7.13%  | 77.47% | 7.85%   |
+| Normalized reconstruction joins | 45.12%  | 45.12%    | 58.36% | 72.01% | 100%   | 78.02% | 0%     | 69.72%  |
 
 **(3) Performance Analysis:**
 
