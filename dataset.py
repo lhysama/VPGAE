@@ -169,7 +169,6 @@ def dynamic_workloads(group_num=3, queries_number=15):
 	attribute_number = 100
 
 	for g in range(group_num):
-		# 在HAP的wide表上进行分区，工作负载中的查询集合在不断变化
 		workload = []
 		workload.append(queries_number)
 		workload.append(attribute_number)
@@ -196,7 +195,7 @@ def dynamic_workloads(group_num=3, queries_number=15):
 		workload.append(100000)
 		dynamic_workloads_group.append(workload)
 	
-	# 将group个queries合并成一个静态的workload
+	# Combine multiple dynamic workloads into one static workload
 	static_workload=[]
 	static_workload.append(queries_number*group_num)
 	static_workload.append(attribute_number)
