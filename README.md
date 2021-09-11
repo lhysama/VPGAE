@@ -17,6 +17,8 @@ This is a PyTorch implementation of our proposed vertical partitioning algorithm
 - scipy
 - tqdm
 - pyvis
+- psycopg2
+- copy
 
 ## Run basic experiments
 
