@@ -125,7 +125,7 @@ Table 3:
 | ROW       | 0        | 4         | 0            | 5735      | 458             | 0           |
 | NAVATHE   | 0        | 4         | 0            | 4588      | 93              | 0           |
 
-Table 4 (NAVATHE needs more than 3 hours to generate partitioning scheme on web_sales and catalog_sales tables):
+Table 4:
 
 | Method    | web_sales | catalog_sales | store_sales | time_dim | reason | store_returns | store |
 | --------- | --------- | ------------- | ----------- | -------- | ------ | ------------- | ----- |
@@ -136,7 +136,7 @@ Table 4 (NAVATHE needs more than 3 hours to generate partitioning scheme on web_
 | COLUMN    | 705       | 4687          | 56940       | 68       | 2      | 285           | 26    |
 | O2P       | 705       | 4192          | 57075       | 68       | 1      | 226           | 14    |
 | ROW       | 2986      | 17949         | 153672      | 226      | 1      | 1432          | 13    |
-| NAVATHE   | -         | 3768          | 55805       | 51       | 1      | 198           | 13    |
+| NAVATHE   | 493       | 3768          | 55805       | 51       | 1      | 198           | 13    |
 
 The unnecessary data read and normalized reconstruction joins of baselines and our approaches are shown in Table 5:
 
