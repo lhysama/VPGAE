@@ -15,7 +15,7 @@ def randomcolor():
     return "#"+color
 
 def PCAVisualization(embedding,partition):
-	# PCA the embedding vector to 2 dim
+	# PCA the embedding vector to 2-dim
 	pca=PCA(n_components=2,whiten=True)
 	node_embeddings_2d=pca.fit_transform(embedding)
 	
