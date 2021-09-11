@@ -7,12 +7,12 @@ def partition(workload):
 	best_partitioning_scheme = candidates
 	
 	candidates = [best_partitioning_scheme, best_cost]
-	# start search
+	# Start greedy search
 	while True:
 		temp_best_cost = float('inf')
 		temp_best_partitioning_schemes = []
 		partitioning_scheme = candidates[0]
-		# merge two partitions
+		# Merge two partitions
 		for i in range(len(partitioning_scheme)-1):
 			for j in range(i+1,len(partitioning_scheme)):
 				temp_partitioning_scheme = copy.deepcopy(partitioning_scheme)
@@ -24,12 +24,12 @@ def partition(workload):
 					temp_best_cost = cost
 					temp_best_partitioning_schemes = temp_partitioning_scheme
 
-		# if current best partitioning scheme is better than the history best partitioning scheme, then update best_cost, best_partitioning_scheme and candidates
+		# If current best partitioning scheme is better than the history best partitioning scheme, then update best_cost, best_partitioning_scheme and candidates
 		if(temp_best_cost < best_cost):
 			best_cost = temp_best_cost
 			best_partitioning_scheme = temp_best_partitioning_schemes
 			candidates = [best_partitioning_scheme,best_cost]
-		# if current best partitioning scheme is worse than the history best partitioning scheme, stop search
+		# If current best partitioning scheme is worse than the history best partitioning scheme, stop search
 		else:
 			break
 
