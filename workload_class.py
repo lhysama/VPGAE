@@ -1,6 +1,6 @@
 import numpy as np
 
-# usage matrix to affinity matrix
+# Usage matrix to affinity matrix
 def usage_matrix_to_affinity_matrix(usage_matrix):
 	attribute_num = usage_matrix.shape[1] - 1
 	query_num = usage_matrix.shape[0]
@@ -15,7 +15,7 @@ def usage_matrix_to_affinity_matrix(usage_matrix):
 			affnity_matrix[j][i] = temp
 	return affnity_matrix
 
-# define workload profile class
+# Define workload profile class
 class Workload():
 	def __init__(self,query_num, attribute_num, attribute_usage_list, frequence_list, selectivity_list=None,length_of_attributes=None, scan_key_list=None, cluster_index = None, cardinality = None):
 		self.required_attributes = attribute_usage_list
