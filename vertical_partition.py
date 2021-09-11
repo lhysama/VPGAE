@@ -15,7 +15,7 @@ from workload_class import Workload
 
 # random dataset experiments
 if __name__ == "__main__":
-	attributes_num = [75]
+	attributes_num = [25,50,75,100,125,150]
 	for a_num in attributes_num:
 		print("tables have {} attributes.".format(a_num))
 		w_num = 100
