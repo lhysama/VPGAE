@@ -43,7 +43,7 @@ wide_table_attrs = 	[["a1","CHAR(150) NOT NULL"],
 					 ["a29","CHAR(20) NOT NULL"],
 					 ["a30","INTEGER NOT NULL"]]
 
-# 是否list1包含了list2中的所有元素
+# If list1 include all elements in list2
 def include(list1,list2):
 	for ele in list2:
 		if(ele not in list1):
@@ -53,7 +53,7 @@ def include(list1,list2):
 def doPartitioningOnLineitemWithoutJoin(partitions,workload):
 	subtables = ["wide_table"+str(i) for i in range(len(partitions))]
 
-	conn = psycopg2.connect(database="wide_test", user="postgres", password="lhy19990316", host="127.0.0.1", port="5432")
+		conn = psycopg2.connect(database="wide_test", user="postgres", password="your-password", host="127.0.0.1", port="5432")
 	conn.autocommit = True
 	cursor = conn.cursor()
 
@@ -61,7 +61,7 @@ def doPartitioningOnLineitemWithoutJoin(partitions,workload):
 	temp_partitions = copy.deepcopy(partitions)
 	
 	
-	# 在数据库中按照分区结果创建每个子表，但是还没有注入数据
+	# Create subtables 
 	for index,subtable in enumerate(subtables):
 		print(subtable+":")
 		for attrid in temp_partitions[index]:
@@ -75,10 +75,10 @@ def doPartitioningOnLineitemWithoutJoin(partitions,workload):
 		sql = sql[:-1]+")"
 		cursor.execute(sql)
 
-	# 是否存在primary key，如果不存在的话就没有parimary partition，如果存在则需要判断分区结果是否有parimary partition
+	# If there is clustered index
 	if workload.cluster_index != None:
-		# 是否存在primary partition，如果存在，在primary partition中建立primary key
 		for index,partition in enumerate(temp_partitions):
+			# If there is a primary partition
 			if include(partition,workload.cluster_index):
 				sql = "alter table "+"wide_table"+str(index)+" add constraint wide_table"+str(index)+"_pkey primary key ("
 				for attrid in workload.cluster_index:
@@ -88,7 +88,7 @@ def doPartitioningOnLineitemWithoutJoin(partitions,workload):
 				print(sql)
 				cursor.execute(sql)
 
-	# 向表中填充数据
+	# Insert data into subtables
 	for idx,subtable in enumerate(subtables):
 		sql = "insert into " + subtable + " select "
 		for attrid in temp_partitions[idx]:
@@ -101,9 +101,9 @@ def doPartitioningOnLineitemWithoutJoin(partitions,workload):
 	
 
 	sql_list = []
-	# 执行事务中包含的所有查询
+	# Execute all queries in the workload
 	for index,query_attributes in enumerate(workload.required_attributes):
-		# 根据查询使用的属性，确定查询使用到的子表id
+		# Find all subtables that are referenced in the query
 		dict_ = dict()
 
 		required_subtables_id = set()
@@ -153,7 +153,7 @@ def doPartitioningOnLineitemWithoutJoin(partitions,workload):
 	print("execution time of workload on partitioned tables: {}".format(time.time()-st))
 	
 	
-	# 执行完sql语句之后，我们删除由分区诞生的所有子表
+	# Delete all subtables
 	for subtable in subtables:
 		sql = "drop table " + subtable + ";"
 		cursor.execute(sql)
@@ -164,7 +164,7 @@ def doPartitioningOnLineitemWithoutJoin(partitions,workload):
 
 def convert2sql(data):
 	origin_sqls = []
-	# 根据查询生成每个sql
+
 	for idx in range(data[0]):
 		sql = "explain analyse select "
 		for attrid in data[2][idx]:
@@ -175,9 +175,9 @@ def convert2sql(data):
 			origin_sqls.append(sql)
 		
 	return origin_sqls
-
+'''
 def execution_sqls(sqls):
-	conn = psycopg2.connect(database="wide_test", user="postgres", password="lhy19990316", host="127.0.0.1", port="5432")
+	conn = psycopg2.connect(database="wide_test", user="postgres", password="your-password", host="127.0.0.1", port="5432")
 	conn.autocommit = True
 	cursor = conn.cursor()
 
@@ -188,7 +188,8 @@ def execution_sqls(sqls):
 		
 	cursor.close()
 	conn.close()
-	
+'''
+
 if __name__ == "__main__":
 	data = dataset.real_system_wide_table()
 	workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
