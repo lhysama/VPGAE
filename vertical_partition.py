@@ -13,6 +13,7 @@ from unnecessary_data_read import fraction_of_unnecessary_data_read
 from reconstruction_joins import number_of_joins
 from workload_class import Workload
 
+'''
 # random dataset experiments
 if __name__ == "__main__":
 	attributes_num = [25,50,75,100,125,150]
@@ -66,9 +67,9 @@ if __name__ == "__main__":
 		print("Avg. HILLCLIMB time:{}".format(np.mean(hill_times)))
 
 		print("--------------------")
-
-
 '''
+
+
 # TPC-H benchmark experiments
 if __name__ == "__main__":
 	dataset_ = dataset.tpch_workload(10)
@@ -128,7 +129,7 @@ if __name__ == "__main__":
 	print("normalized reconstruction joins of ROW:", np.sum(number_of_joins(row_partitions_list, workload_list))/column_RJ)
 
 	print("--------------------")
-'''
+
 
 '''
 # TPC-DS benchmark experiments
