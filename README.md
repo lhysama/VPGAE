@@ -4,7 +4,7 @@
 
 This is a PyTorch implementation of our proposed vertical partitioning algorithm: **VPGAE** and **VPGAE-B**, as described in our paper:
 
-**VPGAE: Learning Vertical Partitions with Graph AutoEncoder** (The paper link will be displayed after publication)
+**VPGAE: Learning Vertical Partitions with Graph AutoEncoder**
 
 ## Requirements
 
@@ -20,138 +20,25 @@ This is a PyTorch implementation of our proposed vertical partitioning algorithm
 - psycopg2
 - copy
 
-## Run basic experiments
+## Run our experiments
 
-We have implemented all the experiments mentioned in our paper in the *vertical_partition.py* file, so we can directly run this file using Python:
+### 1. Preliminary Experiment
+
+In our paper, we conduct a preliminary experiment to verify the reliability of our cost model.  **PostgreSQL 11.2** database is utilized in our experiment as the realistic system. First, you need to run *generate_wide_table.py* file to define a wide table and insert data into it. Then, just run *vertical_partition_real_system.py* file to see the results. Note that, before running our code, you need to modify the pg config options (such as password and host-IP) in the above two files.
+
+### 2. RQ2, RQ3 and HAP
+
+We have implemented TPC-H and TPC-DS benchmark (RQ2), random dataset (RQ3), and HAP benchmark (example in the Introduction section) experiments in *vertical_partition.py* file. The arg "dataset" is available to choose a dataset, so you can directly run this file:
 
 ```python
-python vertical_partition.py
+python vertical_partition.py --dataset dataset_name
 ```
 
-By default, this program will run TPC-H benchmark experiments. You can open the corresponding code blocks in the file to perform other basic experiments.
+dataset_name available options: **TPC_H, TPC_DS, random_dataset, HAP**. By default, this file will run the TPC-H benchmark experiment. 
 
-## **Supplementary experiments (new)**
+### 3. RQ4
 
-### 1.  Experiments results on Real Databases:
-
-**(1) Experimental Settings**: 
-
-DBMS: PostgreSQL 11.2
-
-Dataset: Table W with 30 attributes and 100158 lines
-
-Workload: 26 queries generated from template “select ai,...,am from W”
-
-Methods: We use all baseline methods as well as our VPGAE and VPGAE-B to partition W vertically, execute the workload on the partitioned sub-tables, and record the actual execution time of the workload as the real cost. In order to eliminate interference factors such as cache, all experiments are repeated five times after the cache is hot, and the average execution time is taken as the final experimental result.
-
-**(2) Experimental Results** (note: NAVATHE spent more than 1 hour on generating partitioning scheme, we gave up the evaluation of this method):
-
-| Method    | Estimated cost | Workload run time (real cost) |
-| --------- | :------------: | :---------------------------: |
-| VPGAE-B   |     53804      |          1698.483 ms          |
-| HILLCLIMB |     53804      |          1767.468 ms          |
-| VPGAE     |     53844      |          1752.324 ms          |
-| HYRISE    |     53844      |          1876.993 ms          |
-| COLUMN    |     54491      |          2432.890 ms          |
-| O2P       |     55946      |          2489.374 ms          |
-| ROW       |     331812     |          6233.532 ms          |
-| NAVATHE   |     **-**      |             **-**             |
-
-**(3) Performance Analysis**: 
-
-The results show that the real cost trends are consistent with the estimated cost trends, i.e., methods with larger estimated cost are tend to have larger run time. And although VPGAE-B has the same estimated cost with HILLCLIMB, the real cost of VPGAE-B is smaller than HILLCLIMB, and the same phenomenon occurs between VPGAE and HYRISE. We analyzed the partitioning scheme of different methods and found that different schemes might have the same estimated cost. But VPGAE(-B) utilizes the valuable information from the affinity graph, leading to better partitioning scheme with less run time cost. This result indicates that our cost model is reasonable and our partitioning method is effective in reality. 
-
-### 2.  Experiments results on Dynamic Workload:
-
-**(1) Experimental Settings**: 
-
-We first generate 150 queries on table W, and divided them into 15 workloads evenly. Then we take the 15 workloads as streaming input into the partitioning algorithms and evaluate the estimated cost. We also treat all 150 queries as a static workload.
-
-**(2) Experimental results**:
-
-| Method  | Estimated cost on dynamic workload | Estimated cost on static workload |
-| ------- | ---------------------------------- | --------------------------------- |
-| VPGAE-B | 38330                              | 49480                             |
-| VPGAE   | 38890                              | 49510                             |
-
-**(3) Performance Analysis:** 
-
-The results show that both VPGAE and VPGAE-B fit dynamic workload well. Compared with static workload, VPGAE and VPGAE-B on dynamic workloads improves query performance by 27.31% and 29.09%, respectively. This verified that our proposed solution can adapt to workload changes well.
-
-## 3.  Experiments results on TPC-DS benchmark:
-
-**(1) Experimental Settings:**
-
-We generate 1 GB TPC-DS data in **PostgreSQL 11.2** and select 26 template to generate queries. For each template, we only generate one query , and we treat those 26 queries as a workload.
-
-**(2)  Experimental results:**
-
-The experiments results of estimated cost of baselines and our approaches on TPC-DS benchmark are shown in Table 1-4:
-
-Table 1:
-
-| Method    | customer_address | customer_demographics | date_dim | warehouse | ship_mode |
-| --------- | ---------------- | --------------------- | -------- | --------- | --------- |
-| VPGAE-B   | 193              | 10792                 | 1007     | 2         | 2         |
-| HILLCLIMB | 193              | 10792                 | 1007     | 2         | 2         |
-| VPGAE     | 193              | 10836                 | 1007     | 2         | 2         |
-| HYRISE    | 193              | 11080                 | 1116     | 2         | 2         |
-| COLUMN    | 196              | 12208                 | 1300     | 4         | 4         |
-| O2P       | 222              | 11920                 | 1334     | 2         | 2         |
-| ROW       | 1092             | 19698                 | 5014     | 2         | 2         |
-| NAVATHE   | 222              | 11920                 | 1194     | 2         | 2         |
-
-Table 2:
-
-| Method    | income_band | item | call_center | customer | web_site | household_demographics |
-| --------- | ----------- | ---- | ----------- | -------- | -------- | ---------------------- |
-| VPGAE-B   | 1           | 743  | 2           | 944      | 1        | 35                     |
-| HILLCLIMB | 1           | 743  | 2           | 944      | 1        | 35                     |
-| VPGAE     | 1           | 750  | 2           | 944      | 1        | 35                     |
-| HYRISE    | 1           | 743  | 3           | 944      | 1        | 44                     |
-| COLUMN    | 3           | 759  | 6           | 1028     | 2        | 44                     |
-| O2P       | 2           | 764  | 3           | 984      | 1        | 41                     |
-| ROW       | 1           | 2899 | 2           | 4137     | 1        | 49                     |
-| NAVATHE   | 1           | 755  | 2           | 984      | 1        | 41                     |
-
-Table 3:
-
-| Method    | web_page | promotion | catalog_page | inventory | catalog_returns | web_returns |
-| --------- | -------- | --------- | ------------ | --------- | --------------- | ----------- |
-| VPGAE-B   | 0        | 2         | 0            | 4588      | 78              | 0           |
-| HILLCLIMB | 0        | 2         | 0            | 4588      | 78              | 0           |
-| VPGAE     | 0        | 2         | 0            | 4588      | 78              | 0           |
-| HYRISE    | 0        | 2         | 0            | 4588      | 78              | 0           |
-| COLUMN    | 0        | 6         | 0            | 6882      | 123             | 0           |
-| O2P       | 0        | 4         | 0            | 4588      | 93              | 0           |
-| ROW       | 0        | 4         | 0            | 5735      | 458             | 0           |
-| NAVATHE   | 0        | 4         | 0            | 4588      | 93              | 0           |
-
-Table 4:
-
-| Method    | web_sales | catalog_sales | store_sales | time_dim | reason | store_returns | store |
-| --------- | --------- | ------------- | ----------- | -------- | ------ | ------------- | ----- |
-| VPGAE-B   | 422       | 3486          | 52287       | 43       | 1      | 198           | 13    |
-| HILLCLIMB | 422       | 3486          | 52287       | 43       | 1      | 198           | 13    |
-| VPGAE     | 422       | 3557          | 54956       | 43       | 1      | 198           | 13    |
-| HYRISE    | 422       | 3486          | 55525       | 43       | 1      | 198           | 22    |
-| COLUMN    | 705       | 4687          | 56940       | 68       | 2      | 285           | 26    |
-| O2P       | 705       | 4192          | 57075       | 68       | 1      | 226           | 14    |
-| ROW       | 2986      | 17949         | 153672      | 226      | 1      | 1432          | 13    |
-| NAVATHE   | 493       | 3768          | 55805       | 51       | 1      | 198           | 13    |
-
-The unnecessary data read and normalized reconstruction joins of baselines and our approaches are shown in Table 5:
-
-Table 5:
-
-|                                 | VPGAE-B | HILLCLIMB | VPGAE  | HYRISE | COLUMN | O2P    | ROW    | NAVATHE |
-| ------------------------------- | ------- | --------- | ------ | ------ | ------ | ------ | ------ | ------- |
-| Unnecessary data read           | 11.48%  | 11.48%    | 9.49%  | 3.4%   | 0%     | 7.13%  | 77.47% | 7.85%   |
-| Normalized reconstruction joins | 45.12%  | 45.12%    | 58.36% | 72.01% | 100%   | 78.02% | 0%     | 69.72%  |
-
-**(3) Performance Analysis:**
-
-The results show that both VPGAE and VPGAE-B still maintain good performance when we extended the analysis to TPC-DS.
+We also conduct an experiment to verify the performance of our dynamic strategy. Feel free to run *vertical_partition_dynamic_workload.py* file and wait patiently to see the results.
 
 ## Implemented methods
 
