@@ -1,7 +1,7 @@
 import random
 import numpy as np
 
-def random_generator(num = 100, q_num_range = [1,20], a_num_range = [1,100], freq_range = [1,10], selectivity_range = [0.0005,0.5],lenth_of_attr_range= [2,50],cardinality_range=[5000,25000]):
+def random_generator(num = 100, q_num_range = [1,30], a_num_range = [1,100], freq_range = [1,10], selectivity_range = [0.0005,0.5],lenth_of_attr_range= [2,50],cardinality_range=[5000,25000]):
 	seed = 777
 	np.random.seed(seed)
 	random.seed(seed)
@@ -24,12 +24,13 @@ def random_generator(num = 100, q_num_range = [1,20], a_num_range = [1,100], fre
 			random_attr_select = sorted(random_attr_select)
 			attribute_usage_list.append(random_attr_select)
 			rad = random.random()
-			if rad < 0.1:
+			if rad < 0.9:
 				freq_list.append(random.randint(freq_range[0],freq_range[1]))
 			else:
 				freq_list.append(random.randint(50,100))
 			scan_key_list.append([random_attr_select[random.randint(0,len(random_attr_select)-1)]])
 			selectivity_list.append(round(selectivity_range[0] + 0.0005*(random.randint(0,(selectivity_range[1]-selectivity_range[0])/0.0005)),4))
+		
 		data.append(q_num)
 		data.append(a_num)
 		data.append(attribute_usage_list)
@@ -122,11 +123,15 @@ def tpcds_workload():
 			catalog_page,inventory,catalog_returns,web_returns,web_sales,catalog_sales,store_sales]
 
 
-def HAP(queries_number_list):
+def HAP_example(queries_number_list):
+	seed = 777
+	np.random.seed(seed)
+	random.seed(seed)
+	
 	dataset = []
 	for queries_number in queries_number_list:
 		selectivity = 0.3
-		projectivity = 16
+		projectivity = 8
 		attribute_number = 160
 		
 		workload = []
@@ -136,14 +141,21 @@ def HAP(queries_number_list):
 		attribute_list = [i+1 for i in range(attribute_number)]
 		attribute_usage_list = []
 		scankey_list = []
+		freq_list = []
+		
 		# randomly select projectivity attributes
 		for i in range(queries_number):
 			random.shuffle(attribute_list)
 			attribute_usage_list.append(attribute_list[:projectivity])
 			scankey_list.append([attribute_list[0]])
+			rad = random.random()
+			if rad < 0.9:
+				freq_list.append(random.randint(1,10))
+			else:
+				freq_list.append(random.randint(75,100))
 
 		workload.append(attribute_usage_list)
-		workload.append([1 for i in range(queries_number)])
+		workload.append(freq_list)
 		workload.append([selectivity for i in range(queries_number)])
 		attr_length_list = [8]
 		for i in range(attribute_number-1):
@@ -195,22 +207,26 @@ def dynamic_workloads(group_num=3, queries_number=15):
 		workload.append(100000)
 		dynamic_workloads_group.append(workload)
 	
-	# Combine multiple dynamic workloads into one static workload
-	static_workload=[]
-	static_workload.append(queries_number*group_num)
-	static_workload.append(attribute_number)
-	static_workload.append([])
-	static_workload.append([])
-	static_workload.append([])
-	static_workload.append([])
-	static_workload.append([])
-	static_workload[5] = dynamic_workloads_group[0][5]
-	for workload in dynamic_workloads_group:
-		static_workload[2] += workload[2]
-		static_workload[3] += workload[3]
-		static_workload[4] += workload[4]
-		static_workload[6] += workload[6]
-	static_workload.append(dynamic_workloads_group[0][7])
-	static_workload.append(dynamic_workloads_group[0][8])
+	return dynamic_workloads_group
 
-	return dynamic_workloads_group, static_workload
+def dynamic_date_dim():
+	date_dim = [23, 28, [[1, 3, 7, 9], [1, 3, 7], [1, 3, 7], [1, 3, 7, 11], [1, 3, 7, 9], [1, 3, 4], [1, 3, 7], [1, 3, 7], [1, 3, 7, 10], [1, 3, 7, 9], [1, 3, 7, 15], [1, 3, 7], [1, 3, 7, 9], [1, 3, 4, 11], [1, 3, 7, 9], [1, 3, 4], [1, 3, 4, 9], [1, 3, 4, 7, 9, 11], [1, 3, 7, 10], [1, 3, 7, 8], [1, 3, 7, 9], [1, 3, 7, 9], [1, 3, 4]], [1, 1, 1, 2, 10, 1, 3, 1, 1, 1, 1, 1, 6, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1], [0.08213664800339499, 0.004996646086873195, 0.004996646086873195, 0.001245739161384824, 0.0004106832400169749, 0.005010335528207094, 0.004996646086873195, 0.004996646086873195, 0.0034497392161425893, 0.0004106832400169749, 0.005010335528207094, 0.004996646086873195, 0.00042437268135087406, 0.004996646086873195, 0.0004106832400169749, 0.004996646086873195, 0.004996646086873195, 0.004996646086873195, 0.0009856397760407399, 0.0021492422894221685, 0.004996646086873195, 0.00042437268135087406, 0.005010335528207094], [4, 17, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 10, 7, 2, 2, 2, 4, 4, 4, 4, 2, 2, 2, 2, 2], [[9], [7], [7], [7, 11], [7, 9], [4], [7], [7], [7, 10], [7, 9], [7], [7], [7, 9], [4], [7, 9], [4], [4], [4], [7, 10], [7, 8], [7], [7, 9], [4]], [3], 73049]
+	dynamic_workloads_group = []
+	
+	for i in range(date_dim[0]):
+		for j in range(date_dim[3][i]):
+			workload = []
+			workload.append(1)
+			workload.append(28)
+			workload.append([date_dim[2][i]])
+			workload.append([1])
+			workload.append([date_dim[4][i]])
+			workload.append(date_dim[5])
+			workload.append([date_dim[6][i]])
+			workload.append(date_dim[7])
+			workload.append(date_dim[8])
+
+			dynamic_workloads_group.append(workload)
+
+	random.shuffle(dynamic_workloads_group)
+	return dynamic_workloads_group
