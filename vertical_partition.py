@@ -6,114 +6,121 @@ import row
 import optimal
 import my_cost_model
 import hillclimb
+import argparse
 
 import numpy as np
 
 from unnecessary_data_read import fraction_of_unnecessary_data_read
 from reconstruction_joins import number_of_joins
-from workload_class import Workload
+from workload_class import VPGAE_Workload, Workload
 
-'''
-# random dataset experiments
-if __name__ == "__main__":
-	attributes_num = [25,50,75,100,125,150]
-	for a_num in attributes_num:
-		print("tables have {} attributes.".format(a_num))
-		w_num = 100
-		dataset_ = dataset.random_generator(num = w_num, a_num_range = [a_num,a_num])
-		
-		beam_costs = []
-		kmeans_costs = []
-		hill_costs = []
-		column_costs = []
-		
-		beam_times = []
-		kmeans_times = []
-		hill_times = []
-		
-		for i,data in enumerate(dataset_):
-			workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
-			
-			t2=time.time()
-			kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE",workload=workload,n_hid=64,n_dim=32,k=3)
-			kmeans_time=time.time()-t2
-
-			t1=time.time()
-			beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload=workload,n_hid=64,n_dim=32,k=3,origin_candidate_length=3,beam_search_width=1)
-			beam_time=time.time()-t1
-
-			t3=time.time()
-			hill_cost, hill_partitions = hillclimb.partition(workload=workload)
-			hill_time=time.time()-t3
-
-			column_cost, column_partitions = column.partition(workload=workload)
-
-			beam_costs.append(beam_cost)
-			kmeans_costs.append(kmeans_cost)
-			hill_costs.append(hill_cost)
-			column_costs.append(column_cost)
-
-			beam_times.append(beam_time)
-			kmeans_times.append(kmeans_time)
-			hill_times.append(hill_time)
-
-		print("Avg. VPGAE-B cost:{}".format(np.mean(beam_costs)))
-		print("Avg. VPGAE cost:{}".format(np.mean(kmeans_costs)))
-		print("Avg. HILLCLIMB cost:{}".format(np.mean(hill_costs)))
-		print("Avg. COLUMN cost:{}".format(np.mean(column_costs)))
-		
-		print("Avg. VPGAE-B time:{}".format(np.mean(beam_times)))
-		print("Avg. VPGAE time:{}".format(np.mean(kmeans_times)))
-		print("Avg. HILLCLIMB time:{}".format(np.mean(hill_times)))
-
-		print("--------------------")
-'''
-
+parser = argparse.ArgumentParser(description='VPGAE')
+parser.add_argument('--dataset', default="TPC-H", type=str, help='name of the experiment you want to run. (options: TPC_H, TPC_DS, random_dataset, HAP).')
 
 # TPC-H benchmark experiments
-if __name__ == "__main__":
+def TPC_H_exp():
+	use_OPTIMAL = False
 	dataset_ = dataset.tpch_workload(10)
+
 	beam_costs = []
 	kmeans_costs = []
 	hill_costs = []
 	column_costs = []
 	row_costs = []
+	optimal_costs = []
+	hyrise_costs = []
+	navathe_costs = []
+	o2p_costs = []
 
 	beam_partitions_list = []
 	kmeans_partitions_list = []
 	hill_partitions_list = []
 	column_partitions_list = []
 	row_partitions_list = []
+	optimal_partitions_list = []
+	hyrise_partitions_list = []
+	navathe_partitions_list = []
+	o2p_partitions_list = []
+
 	workload_list = []
 
 	for i,data in enumerate(dataset_):
 		workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
-		
-		beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload=workload,n_hid=4,n_dim=16,k=3,origin_candidate_length=3,beam_search_width=3)
-		kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE",workload=workload,n_hid=4,n_dim=16,k=3)
+		vpgae_workload = VPGAE_Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
+
+		beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload=vpgae_workload,n_hid=4,n_dim=16,k=3,origin_candidate_length=3,beam_search_width=3)
+		kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE",workload=vpgae_workload,n_hid=4,n_dim=16,k=3)
 		
 		hill_cost, hill_partitions = hillclimb.partition(workload=workload)
 		column_cost, column_partitions = column.partition(workload=workload)
 		row_cost, row_partitions = row.partition(workload=workload)
-
+		if use_OPTIMAL:
+			optimal_cost, optimal_partitions = optimal.partition(workload=workload)
+			optimal_costs.append(optimal_cost)
+			optimal_partitions_list.append(optimal_partitions)
+		
 		beam_costs.append(beam_cost)
 		kmeans_costs.append(kmeans_cost)
 		hill_costs.append(hill_cost)
 		column_costs.append(column_cost)
 		row_costs.append(row_cost)
-
+		
 		beam_partitions_list.append(beam_partitions)
 		kmeans_partitions_list.append(kmeans_partitions)
 		hill_partitions_list.append(hill_partitions)
 		column_partitions_list.append(column_partitions)
 		row_partitions_list.append(row_partitions)
+
 		workload_list.append(workload)
+
+	hyrise_partitions_list = [[[8, 3], [2], [6, 5], [7], [4], [1]],
+							[[13, 12], [2], [15], [14], [11], [3], [7], [6], [9], [16, 4], [10, 8], [1], [5]],
+							[[3], [8], [6], [5], [1, 2], [9], [4], [7]],
+							[[6], [7], [2], [5], [3], [1, 4]],
+							[[9, 8], [3], [5], [4], [2], [1], [6], [7]],
+							[[5], [4], [3], [2, 1]],
+							[[3], [2, 1], [4]],
+							[[1, 2], [3]]]
 	
+	for i in range(len(workload_list)):
+		hyrise_costs.append(my_cost_model.calculate_cost_fair(hyrise_partitions_list[i],workload_list[i]))
+
+	navathe_partitions_list = [[[7, 3], [6, 5], [4], [2], [8], [1]],
+							[[16, 10], [9], [15], [13, 12], [3], [7, 6], [11], [5], [2], [14], [8], [4], [1]],
+							[[7, 3], [6], [5], [2], [4], [8], [9], [1]],
+							[[7, 6], [3], [4], [2], [5], [1]],
+							[[9, 3], [7], [4], [6], [5], [2], [8], [1]],
+							[[5, 4], [3, 2, 1]],
+							[[4], [3, 2, 1]],
+							[[3], [2, 1]]]
+	
+	for i in range(len(workload_list)):
+		navathe_costs.append(my_cost_model.calculate_cost_fair(navathe_partitions_list[i],workload_list[i]))
+
+	o2p_partitions_list = [[[7, 3], [5], [6], [4], [2], [8], [1]],
+							[[16, 10], [9], [15], [12], [13], [3], [7, 6], [11], [5, 2], [14], [8], [4], [1]],
+							[[7, 6, 3], [5], [2], [8, 4], [9], [1]],
+							[[7, 6], [3], [4], [2], [5], [1]],
+							[[9, 3], [7, 4], [6], [5], [2], [8], [1]],
+							[[5, 4], [3, 2, 1]],
+							[[4], [3, 2, 1]],
+							[[2, 1], [3]]]
+
+	for i in range(len(workload_list)):
+		o2p_costs.append(my_cost_model.calculate_cost_fair(o2p_partitions_list[i],workload_list[i]))
+
 	print("VPGAE-B costs on 8 tables:", beam_costs)
 	print("VPGAE costs on 8 tables:", kmeans_costs)
 	print("HILLCLIMB costs on 8 tables:", hill_costs)
 	print("COLUMN costs on 8 tables:", column_costs)
 	print("ROW costs on 8 tables:", row_costs)
+
+	print("HYRISE costs on 24 tables:", hyrise_costs)
+	print("NAVATHE costs on 24 tables:", navathe_costs)
+	print("O2P costs on 24 tables:", o2p_costs)
+
+	if use_OPTIMAL:
+		print("OPTIMAL costs on 8 tables:", optimal_costs)
 	
 	print("Unnecessary data read of VPGAE-B:", fraction_of_unnecessary_data_read(beam_partitions_list, workload_list))
 	print("Unnecessary data read of VPGAE:", fraction_of_unnecessary_data_read(kmeans_partitions_list, workload_list))
@@ -121,19 +128,34 @@ if __name__ == "__main__":
 	print("Unnecessary data read of COLUMN:", fraction_of_unnecessary_data_read(column_partitions_list, workload_list))
 	print("Unnecessary data read of ROW:", fraction_of_unnecessary_data_read(row_partitions_list, workload_list))
 
+	print("Unnecessary data read of HYRISE:", fraction_of_unnecessary_data_read(hyrise_partitions_list, workload_list))
+	print("Unnecessary data read of NAVATHE:", fraction_of_unnecessary_data_read(navathe_partitions_list, workload_list))
+	print("Unnecessary data read of O2P:", fraction_of_unnecessary_data_read(o2p_partitions_list, workload_list))
+	if use_OPTIMAL:
+		print("Unnecessary data read of OPTIMAL:", fraction_of_unnecessary_data_read(optimal_partitions_list, workload_list))
+
 	column_RJ = np.sum(number_of_joins(column_partitions_list, workload_list))
-	print("normalized reconstruction joins of VPGAE-B:", np.sum(number_of_joins(beam_partitions_list, workload_list))/column_RJ)
-	print("normalized reconstruction joins of VPGAE:", np.sum(number_of_joins(kmeans_partitions_list, workload_list))/column_RJ)
-	print("normalized reconstruction joins of HILLCLIMB:", np.sum(number_of_joins(hill_partitions_list, workload_list))/column_RJ)
-	print("normalized reconstruction joins of COLUMN:", column_RJ/column_RJ)
-	print("normalized reconstruction joins of ROW:", np.sum(number_of_joins(row_partitions_list, workload_list))/column_RJ)
+	if column_RJ == 0:
+		print("column reconstruction joins = 0")
+	else:
+		print("normalized reconstruction joins of VPGAE-B:", np.sum(number_of_joins(beam_partitions_list, workload_list))/column_RJ)
+		print("normalized reconstruction joins of VPGAE:", np.sum(number_of_joins(kmeans_partitions_list, workload_list))/column_RJ)
+		print("normalized reconstruction joins of HILLCLIMB:", np.sum(number_of_joins(hill_partitions_list, workload_list))/column_RJ)
+		print("normalized reconstruction joins of COLUMN:", column_RJ/column_RJ)
+		print("normalized reconstruction joins of ROW:", np.sum(number_of_joins(row_partitions_list, workload_list))/column_RJ)
+		
+		print("normalized reconstruction joins of HYRISE:", np.sum(number_of_joins(hyrise_partitions_list, workload_list))/column_RJ)
+		print("normalized reconstruction joins of NAVATHE:", np.sum(number_of_joins(navathe_partitions_list, workload_list))/column_RJ)
+		print("normalized reconstruction joins of O2P:", np.sum(number_of_joins(o2p_partitions_list, workload_list))/column_RJ)
+		if use_OPTIMAL:
+			print("normalized reconstruction joins of OPTIMAL:", np.sum(number_of_joins(optimal_partitions_list, workload_list))/column_RJ)
 
 	print("--------------------")
 
 
-'''
+
 # TPC-DS benchmark experiments
-if __name__ == "__main__":
+def TPC_DS_exp():
 	dataset_ = dataset.tpcds_workload()
 	beam_costs = []
 	kmeans_costs = []
@@ -156,9 +178,10 @@ if __name__ == "__main__":
 
 	for i,data in enumerate(dataset_):
 		workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
+		vpgae_workload = VPGAE_Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
 		
-		beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload=workload,n_hid=16,n_dim=32,k=3,origin_candidate_length=3,beam_search_width=3)
-		kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE",workload=workload,n_hid=16,n_dim=32,k=3)
+		beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B", workload=vpgae_workload,n_hid=8, n_dim=32, k=3, origin_candidate_length=3,beam_search_width=3)
+		kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE", workload=vpgae_workload,n_hid=8, n_dim=32, k=3)
 		
 		hill_cost, hill_partitions = hillclimb.partition(workload=workload)
 		column_cost, column_partitions = column.partition(workload=workload)
@@ -299,77 +322,115 @@ if __name__ == "__main__":
 		print("normalized reconstruction joins of O2P:", np.sum(number_of_joins(o2p_partitions_list, workload_list))/column_RJ)
 
 	print("--------------------")
-'''
 
-'''
-# workload size experiments
-if __name__ == "__main__":
-	data = dataset.lineitem(10)
-	
-	print("workload size = 17")
-	workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
-	
-	beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload=workload,n_hid=4,n_dim=16,k=5,origin_candidate_length=3,beam_search_width=3)
-	kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE",workload=workload,n_hid=4,n_dim=16,k=5)
-	
-	hill_cost, hill_partitions = hillclimb.partition(workload=workload)
-	column_cost, column_partitions = column.partition(workload=workload)
 
-	print("VPGAE-B: ",beam_cost)
-	print("VPGAE: ", kmeans_cost)
-	print("HILLCLIMB: ", hill_cost)
-	print("COLUMN: ", column_cost)
-	print("--------------------")
 
-	for i in range(data[0]-1):
-		print("workload size = {}".format(16-i))
-		data[3][16-i] = 0
-		workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
+# random dataset experiments
+def random_dataset_exp():
+	attributes_num = [200]
+	for a_num in attributes_num:
+		print("tables have {} attributes.".format(a_num))
+		w_num = 40
+		dataset_ = dataset.random_generator(num = w_num, a_num_range = [a_num,a_num])
 		
-		kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE",workload=workload,n_hid=4,n_dim=16,k=5)
-		beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload=workload,n_hid=4,n_dim=16,k=5,origin_candidate_length=3,beam_search_width=3)
+		beam_costs = []
+		kmeans_costs = []
+		hill_costs = []
+		column_costs = []
 		
-		hill_cost, hill_partitions = hillclimb.partition(workload=workload)
-		column_cost, column_partitions = column.partition(workload=workload)
+		beam_times = []
+		kmeans_times = []
+		hill_times = []
+		
+		for i,data in enumerate(dataset_):
+			workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
+			vpgae_workload = VPGAE_Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
+			
+			t2=time.time()
+			kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE",workload = vpgae_workload,n_hid=64,n_dim=32,k=3)
+			kmeans_time=time.time()-t2
+			print("VPGAE cost:{}, time:{:.3f}".format(kmeans_cost,kmeans_time))
 
-		print("VPGAE-B: ",beam_cost)
-		print("VPGAE: ", kmeans_cost)
-		print("HILLCLIMB: ", hill_cost)
-		print("COLUMN: ", column_cost)
+			t1=time.time()
+			beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload = vpgae_workload,n_hid=64,n_dim=32,k=3,origin_candidate_length=3,beam_search_width=3)
+			beam_time=time.time()-t1
+			print("VPGAE-B cost:{}, time:{:.3f}".format(beam_cost,beam_time))
+			
+			t3=time.time()
+			hill_cost, hill_partitions = hillclimb.partition(workload=workload)
+			hill_time=time.time()-t3
+			print("HILLCLIMB cost:{}, time:{:.3f}".format(hill_cost,hill_time))
+			print("")
+
+			column_cost, column_partitions = column.partition(workload=workload)
+
+			beam_costs.append(beam_cost)
+			kmeans_costs.append(kmeans_cost)
+			
+			hill_costs.append(hill_cost)
+			column_costs.append(column_cost)
+
+			beam_times.append(beam_time)
+			kmeans_times.append(kmeans_time)
+			
+			hill_times.append(hill_time)
+
+		print("Avg. VPGAE cost:{}".format(np.mean(kmeans_costs)))
+		print("Avg. VPGAE-B cost:{}".format(np.mean(beam_costs)))
+		
+		print("Avg. HILLCLIMB cost:{}".format(np.mean(hill_costs)))
+		print("Avg. COLUMN cost:{}".format(np.mean(column_costs)))
+		
+		print("Avg. VPGAE-B time:{}".format(np.mean(beam_times)))
+		print("Avg. VPGAE time:{}".format(np.mean(kmeans_times)))
+		
+		print("Avg. HILLCLIMB time:{}".format(np.mean(hill_times)))
+
 		print("--------------------")
-'''
 
-'''
+
 # HAP benchmark experiments
-if __name__ == "__main__":
+def HAP_exp():
 	queries_number_list = [10,15,20]
-	dataset_ = dataset.HAP(queries_number_list)
+	dataset_ = dataset.HAP_example(queries_number_list)
 	for i,data in enumerate(dataset_):
 		print("Workload has {} queries.".format(queries_number_list[i]))
-		table_name = ["HAP"]
-
 		workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
+		vpgae_workload = VPGAE_Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
 		
 		t1=time.time()
-		beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload=workload,n_hid=4,n_dim=16,k=5,origin_candidate_length=3,beam_search_width=3)
-		beam_time = time.time()-t1
+		kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE",workload=vpgae_workload,n_hid=16,n_dim=16,k=3)
+		kmeans_time=time.time()-t1
+		print("VPGAE cost on HAP wide table (example):",kmeans_cost)
+		print("VPGAE time:{}".format(kmeans_time))
 
 		t2=time.time()
-		kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE",workload=workload,n_hid=4,n_dim=16,k=5)
-		kmeans_time=time.time()-t2
-		
+		beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload=vpgae_workload,n_hid=16,n_dim=16,k=3,origin_candidate_length=5,beam_search_width=5)
+		beam_time = time.time()-t2
+		print("VPGAE-B cost on HAP wide table (example):",beam_cost)
+		print("VPGAE-B time:{}".format(beam_time))
+
 		t3=time.time()
 		hill_cost, hill_partitions = hillclimb.partition(workload=workload)
 		hill_time=time.time()-t3
+		print("HILLCLIMB cost on HAP wide table (example):",hill_cost)
+		print("HILLCLIMB time:{}".format(hill_time))
 
 		column_cost, column_partitions = column.partition(workload=workload)
-
-		print("VPGAE-B cost on HAP wide table:",beam_cost)
-		print("VPGAE cost on HAP wide table:",kmeans_cost)
-		print("HILLCLIMB cost on HAP wide table:",hill_cost)
-		print("COLUMN costs on HAP wide table:",column_cost)
-
-		print("VPGAE-B time:{}, VPGAE time:{}, HILLCLIMB time:{}".format(beam_time,kmeans_time,hill_time))
+		print("COLUMN cost on HAP wide table (example):",column_cost)
 
 		print("--------------------")
-'''
+
+if __name__ == "__main__":
+	args = parser.parse_args()
+	dataset_name = args.dataset
+	if dataset_name == "TPC_H":
+		TPC_H_exp()
+	elif dataset_name == "TPC_DS":
+		TPC_DS_exp()
+	elif dataset_name == "random_dataset":
+		random_dataset_exp()
+	elif dataset_name == "HAP":
+		HAP_exp()
+	else:
+		raise ValueError("no such dataset, available options: \n1.TPC_H \n2.TPC_DS \n3.random_dataset \n4.HAP")
