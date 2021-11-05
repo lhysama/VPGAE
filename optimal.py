@@ -1,4 +1,5 @@
 from tqdm import tqdm
+import my_cost_model
 import more_itertools as mit
 
 # optimal method
