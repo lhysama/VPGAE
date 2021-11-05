@@ -55,7 +55,7 @@ def calculate_cost_fair(partitioning_scheme,workload):
 	# iterate query
 	for idx,query_attributes in enumerate(required_attributes):
 		selectivity = 1.0
-		# if exists primary_partition
+		# if exists primary partition
 		if primary_partition != None:
 			query_use_primary_partition = False
 			for attr in query_attributes:
@@ -72,7 +72,7 @@ def calculate_cost_fair(partitioning_scheme,workload):
 				for attr in primary_partition:
 					if attr in query_attributes:
 						query_attributes.remove(attr)
-			
+		# secondary partitions
 		required_partition_ids = []
 		for i,partition in enumerate(partitioning_scheme):
 			for attr in query_attributes:
@@ -89,4 +89,4 @@ def calculate_cost_fair(partitioning_scheme,workload):
 				tuple_length += workload.length_of_attributes[attr-1]
 			total_cost += min(sequential_scan_cost(tuple_length),unclustered_index_scan_cost(selectivity))*workload.freq[idx]
 			
-	return total_cost
+	return int(total_cost)
