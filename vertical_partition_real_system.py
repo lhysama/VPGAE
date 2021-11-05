@@ -8,9 +8,11 @@ import hillclimb
 import psycopg2
 import copy
 
+import my_cost_model
+
 import numpy as np
 
-from workload_class import Workload
+from workload_class import VPGAE_Workload, Workload
 
 wide_table_attrs = 	[["a1","CHAR(150) NOT NULL"],
 					 ["a2","CHAR(500) NOT NULL"],
@@ -53,7 +55,7 @@ def include(list1,list2):
 def doPartitioningOnLineitemWithoutJoin(partitions,workload):
 	subtables = ["wide_table"+str(i) for i in range(len(partitions))]
 
-		conn = psycopg2.connect(database="wide_test", user="postgres", password="your-password", host="127.0.0.1", port="5432")
+	conn = psycopg2.connect(database="wide_test", user="postgres", password="your-password", host="127.0.0.1", port="5432")
 	conn.autocommit = True
 	cursor = conn.cursor()
 
@@ -72,7 +74,7 @@ def doPartitioningOnLineitemWithoutJoin(partitions,workload):
 		for attrid in temp_partitions[index]:
 			sql += wide_table_attrs[attrid-1][0] + " " + wide_table_attrs[attrid-1][1] + ","
 
-		sql = sql[:-1]+")"
+		sql = sql + "tuple_id INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 ))"
 		cursor.execute(sql)
 
 	# If there is clustered index
@@ -143,7 +145,13 @@ def doPartitioningOnLineitemWithoutJoin(partitions,workload):
 	for sql in sql_list:
 		cursor.execute(sql)
 		# print(cursor.fetchall())
-
+	for sql in sql_list:
+		cursor.execute(sql)
+		# print(cursor.fetchall())
+	for sql in sql_list:
+		cursor.execute(sql)
+		# print(cursor.fetchall())
+	
 	print("end cache warm-up.")
 
 	st = time.time()
@@ -193,27 +201,27 @@ def execution_sqls(sqls):
 if __name__ == "__main__":
 	data = dataset.real_system_wide_table()
 	workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
+	vpgae_workload = VPGAE_Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
 
-	cost, partitions = VPGAE.partition(algo_type="VPGAE-B",workload=workload,n_hid=32,n_dim=2,k=5,origin_candidate_length=3,beam_search_width=3)
-	# cost, partitions = VPGAE.partition(algo_type="VPGAE",workload=workload,n_hid=32,n_dim=2,k=5)
+	# cost, partitions = VPGAE.partition(algo_type="VPGAE-B",workload=vpgae_workload,n_hid=32,n_dim=16,k=3,origin_candidate_length=3,beam_search_width=3)
+	# cost, partitions = VPGAE.partition(algo_type="VPGAE",workload=vpgae_workload,n_hid=32,n_dim=16,k=3)
 	# cost, partitions = hillclimb.partition(workload=workload)
 	# cost, partitions = column.partition(workload=workload)
 	# cost, partitions = row.partition(workload=workload)
 
 	# HYRISE partitioning_scheme, estimated cost = 53844
 	# partitions = [[10, 9, 8],[11],[7, 6],[5],[4],[24, 16, 15, 14, 2],[13, 12],[1],[3],[27],[21, 20, 17],[23, 19, 18],[30, 29, 28, 26, 25],[22]]
-	# cost = 53844
+	# cost = my_cost_model.calculate_cost_fair(partitions,workload)
 
 	# NAVATHE partitioning_scheme, estimated cost = 55279
 	# partitions = [[23, 4],[13, 12],[7, 6],[11, 5],[10, 9, 8],[3],[24, 16, 15, 14, 2],[21, 20, 17],[22],[30, 29, 28, 26, 25],[27],[19, 18],[1]]
-	# cost = 55279
+	# cost = my_cost_model.calculate_cost_fair(partitions,workload)
 	
 	# O2P partitioning_scheme, estimated cost = 55946
-	# partitions = [[23, 4],[12],[13],[6],[7],[11],[5],[8],[9],[10],[3],[2],[14],[15],[16],[24],[17],[20],[21],[22],[25],[26],[28],[29],[30],[27],[19,18],[1]]
-	# cost = 55946
-
-	print(cost)
+	partitions = [[23, 4],[12],[13],[6],[7],[11],[5],[8],[9],[10],[3],[2],[14],[15],[16],[24],[17],[20],[21],[22],[25],[26],[28],[29],[30],[27],[19,18],[1]]
+	cost = my_cost_model.calculate_cost_fair(partitions,workload)
 
 	partitions=sorted(partitions,key=lambda x:min(x))
 	
 	doPartitioningOnLineitemWithoutJoin(partitions,workload)
+	print("Estimated cost:", cost)
