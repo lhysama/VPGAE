@@ -29,6 +29,15 @@ def my_loss(output,label_x):
 
 	return loss
 
+def restore_ps(partitioning_scheme, workload):
+	origin_partitioning_scheme = []
+	for partition in partitioning_scheme:
+		temp_partition = []
+		for attr in partition:
+			temp_partition += workload.map_newindex_2_oldindex[attr]
+		origin_partitioning_scheme.append(temp_partition)
+	return origin_partitioning_scheme
+
 def beam_search(embedding,workload,origin_candidate_length,beam_search_width):
 	kmax = embedding.shape[0]
 
@@ -52,13 +61,14 @@ def beam_search(embedding,workload,origin_candidate_length,beam_search_width):
 			else:
 				partitioning_scheme.append(partition)
 
-		total_cost = my_cost_model.calculate_cost_fair(partitioning_scheme,workload)
+		origin_partitioning_scheme = restore_ps(partitioning_scheme, workload)
+		cost = my_cost_model.calculate_cost_fair(origin_partitioning_scheme,workload)
 		
-		if total_cost <= best_cost:
-			best_cost = total_cost
+		if cost <= best_cost:
+			best_cost = cost
 			best_partitioning_scheme = partitioning_scheme
 
-		candidates.append([partitioning_scheme, total_cost])
+		candidates.append([partitioning_scheme, cost])
 	
 	candidates.sort(key = lambda tup:tup[1])
 	
@@ -77,7 +87,8 @@ def beam_search(embedding,workload,origin_candidate_length,beam_search_width):
 					temp_partitioning_scheme.remove(partitioning_scheme[j])
 					temp_partitioning_scheme.append(partitioning_scheme[i]+partitioning_scheme[j])
 					
-					temp_cost = my_cost_model.calculate_cost_fair(temp_partitioning_scheme,workload)
+					origin_partitioning_scheme = restore_ps(temp_partitioning_scheme, workload)
+					temp_cost = my_cost_model.calculate_cost_fair(origin_partitioning_scheme,workload)
 					
 					if temp_cost < best_cost:
 						if len(all_candidates) < beam_search_width:
@@ -98,7 +109,8 @@ def beam_search(embedding,workload,origin_candidate_length,beam_search_width):
 						temp_partitioning_scheme.append(partitioning_scheme[i][0:j])
 						temp_partitioning_scheme.append(partitioning_scheme[i][j:len(partitioning_scheme[i])])
 						
-						temp_cost = my_cost_model.calculate_cost_fair(temp_partitioning_scheme,workload)
+						origin_partitioning_scheme = restore_ps(temp_partitioning_scheme, workload)
+						temp_cost = my_cost_model.calculate_cost_fair(origin_partitioning_scheme,workload)
 					
 						if temp_cost < best_cost:
 							if len(all_candidates) < beam_search_width:
@@ -119,7 +131,8 @@ def beam_search(embedding,workload,origin_candidate_length,beam_search_width):
 			candidates = all_candidates
 		else:
 			break
-	
+
+	best_partitioning_scheme = restore_ps(best_partitioning_scheme, workload)
 	return best_cost,best_partitioning_scheme
 
 def simple_kmeans_search(embedding,workload):
@@ -144,13 +157,14 @@ def simple_kmeans_search(embedding,workload):
 			else:
 				partitioning_scheme.append(partition)
 
-		total_cost = my_cost_model.calculate_cost_fair(partitioning_scheme,workload)
-		# print(total_cost)
+		origin_partitioning_scheme = restore_ps(partitioning_scheme, workload)
+		cost = my_cost_model.calculate_cost_fair(origin_partitioning_scheme, workload)
 
-		if total_cost <= best_cost:
-			best_cost = total_cost
+		if cost <= best_cost:
+			best_cost = cost
 			best_partitioning_scheme = partitioning_scheme
-
+	
+	best_partitioning_scheme = restore_ps(best_partitioning_scheme, workload)
 	return best_cost,best_partitioning_scheme
 
 # graph autoencoder
@@ -168,10 +182,11 @@ class GAE(nn.Module):
 		x, edge_index, edge_attr = data.x, data.edge_index, data.edge_attr
 		# encoder
 		embedding = self.gc1(x,edge_index,edge_attr)
-		
+
 		# decoder
 		x = F.relu(embedding)
-		x = F.relu(self.layer1(x))
+		x = self.layer1(x)
+		x = F.relu(x)
 		x = self.layer2(x)
 
 		return x, embedding
@@ -189,7 +204,7 @@ def partition(algo_type,workload,n_hid,n_dim,k,origin_candidate_length=None, bea
 	# initialize node feature as one-hot vector
 	features = torch.diag(torch.from_numpy(np.array([1.0 for i in range(adj.shape[1])],dtype=np.float32)))
 
-	# in autoencoder, output is input
+	# in autoencoder, the output is input
 	label_x = copy.deepcopy(features)
 	np.set_printoptions(threshold=1e6)
 
@@ -197,7 +212,7 @@ def partition(algo_type,workload,n_hid,n_dim,k,origin_candidate_length=None, bea
 	for i in range(adj.shape[0]):
 		adj[i][i] = np.max(adj)
 	adj = adj/np.max(adj)
-	
+
 	edge_index = []
 	edge_attr = []
 	for i in range(adj.shape[0]):
@@ -208,7 +223,7 @@ def partition(algo_type,workload,n_hid,n_dim,k,origin_candidate_length=None, bea
 
 	edge_index = torch.tensor(edge_index,dtype=torch.long)
 	edge_attr = torch.tensor(edge_attr,dtype=torch.float)
-
+	
 	data = Data(x=features, edge_index=edge_index.t().contiguous(), edge_attr=edge_attr)
 
 	model = GAE(features.shape[0],n_hid,n_dim,k)
@@ -228,17 +243,22 @@ def partition(algo_type,workload,n_hid,n_dim,k,origin_candidate_length=None, bea
 		if(step >= patience):
 			break
 
-		# split train set and validation set
-		train_index = random.sample(row_list, max(1,int((1/4)*features.shape[1])))
-		valid_index = []
-		for ele in row_list:
-			if ele not in train_index:
-				valid_index.append(ele)
+		if len(row_list) > 1:
+			# randomly split train set and validation set
+			train_index = random.sample(row_list, max(1,int((1/4)*features.shape[1])))
+			valid_index = []
+
+			for ele in row_list:
+				if ele not in train_index:
+					valid_index.append(ele)
+		else: # there is only one node in the graph
+			train_index = [0]
+			valid_index = [0]
 
 		model.train()
 		optimizer.zero_grad()
 		output, embedding = model(data)
-
+		
 		train_loss = my_loss(output[train_index],label_x[train_index])
 		train_loss.backward()
 		optimizer.step()
@@ -260,13 +280,15 @@ def partition(algo_type,workload,n_hid,n_dim,k,origin_candidate_length=None, bea
 	with torch.no_grad():
 		output,embedding = model(data)
 	embedding = embedding.numpy().astype(np.float64)
-	
+
 	if algo_type == "VPGAE-B":
 		beam_cost,beam_partitions = beam_search(embedding, workload, origin_candidate_length, beam_search_width)
+		
 		return beam_cost,beam_partitions
 	
 	elif algo_type == "VPGAE":
 		kmeans_cost,kmeans_partitions = simple_kmeans_search(embedding, workload)
+
 		return kmeans_cost,kmeans_partitions
 
 	else:
