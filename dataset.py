@@ -130,7 +130,7 @@ def HAP_example(queries_number_list):
 	
 	dataset = []
 	for queries_number in queries_number_list:
-		selectivity = 0.3
+		selectivity = 0.1
 		projectivity = 8
 		attribute_number = 160
 		
@@ -149,10 +149,10 @@ def HAP_example(queries_number_list):
 			attribute_usage_list.append(attribute_list[:projectivity])
 			scankey_list.append([attribute_list[0]])
 			rad = random.random()
-			if rad < 0.9:
-				freq_list.append(random.randint(1,10))
+			if rad < 0.8:
+				freq_list.append(random.randint(1,20))
 			else:
-				freq_list.append(random.randint(75,100))
+				freq_list.append(random.randint(75,200))
 
 		workload.append(attribute_usage_list)
 		workload.append(freq_list)
