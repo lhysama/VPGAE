@@ -55,7 +55,7 @@ def include(list1,list2):
 def doPartitioningOnLineitemWithoutJoin(partitions,workload):
 	subtables = ["wide_table"+str(i) for i in range(len(partitions))]
 
-	conn = psycopg2.connect(database="wide_test", user="postgres", password="your-password", host="127.0.0.1", port="5432")
+	conn = psycopg2.connect(database="wide_test", user="your-user-name", password="your-password", host="127.0.0.1", port="5432")
 	conn.autocommit = True
 	cursor = conn.cursor()
 
@@ -155,10 +155,13 @@ def doPartitioningOnLineitemWithoutJoin(partitions,workload):
 	print("end cache warm-up.")
 
 	st = time.time()
+	pg_execution_time = 0
 	for sql in sql_list:
 		cursor.execute(sql)
-		# print(cursor.fetchall())
-	print("execution time of workload on partitioned tables: {}".format(time.time()-st))
+		# print(cursor.fetchall()[-1][0].split(" ")[1])
+		pg_execution_time += eval(cursor.fetchall()[-1][0].split(" ")[1])
+	print("execution time of workload on partitioned tables: {} (measured in Python)".format(time.time()-st))
+	print("execution time of workload on partitioned tables: {} (measured in pg)".format(pg_execution_time/1000))
 	
 	
 	# Delete all subtables
@@ -183,30 +186,33 @@ def convert2sql(data):
 			origin_sqls.append(sql)
 		
 	return origin_sqls
-'''
-def execution_sqls(sqls):
-	conn = psycopg2.connect(database="wide_test", user="postgres", password="your-password", host="127.0.0.1", port="5432")
-	conn.autocommit = True
-	cursor = conn.cursor()
 
-	fetch_time=0
-	for sql in sqls:
-		cursor.execute(sql)
-		# print(cursor.fetchall())
+# def execution_sqls(sqls):
+# 	conn = psycopg2.connect(database="wide_test", user="your-user-name", password="your-password", host="127.0.0.1", port="5432")
+# 	conn.autocommit = True
+# 	cursor = conn.cursor()
+
+# 	fetch_time=0
+# 	for sql in sqls:
+# 		cursor.execute(sql)
+# 		# print(cursor.fetchall())
 		
-	cursor.close()
-	conn.close()
-'''
+# 	cursor.close()
+# 	conn.close()
+
 
 if __name__ == "__main__":
 	data = dataset.real_system_wide_table()
 	workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
 	vpgae_workload = VPGAE_Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
 
-	# cost, partitions = VPGAE.partition(algo_type="VPGAE-B",workload=vpgae_workload,n_hid=32,n_dim=16,k=3,origin_candidate_length=3,beam_search_width=3)
+	cost, partitions = VPGAE.partition(algo_type="VPGAE-B",workload=vpgae_workload,n_hid=32,n_dim=16,k=3,origin_candidate_length=3,beam_search_width=3)
 	# cost, partitions = VPGAE.partition(algo_type="VPGAE",workload=vpgae_workload,n_hid=32,n_dim=16,k=3)
+	
 	# cost, partitions = hillclimb.partition(workload=workload)
+	
 	# cost, partitions = column.partition(workload=workload)
+	
 	# cost, partitions = row.partition(workload=workload)
 
 	# HYRISE partitioning_scheme, estimated cost = 53844
@@ -218,8 +224,8 @@ if __name__ == "__main__":
 	# cost = my_cost_model.calculate_cost_fair(partitions,workload)
 	
 	# O2P partitioning_scheme, estimated cost = 55946
-	partitions = [[23, 4],[12],[13],[6],[7],[11],[5],[8],[9],[10],[3],[2],[14],[15],[16],[24],[17],[20],[21],[22],[25],[26],[28],[29],[30],[27],[19,18],[1]]
-	cost = my_cost_model.calculate_cost_fair(partitions,workload)
+	# partitions = [[23, 4],[12],[13],[6],[7],[11],[5],[8],[9],[10],[3],[2],[14],[15],[16],[24],[17],[20],[21],[22],[25],[26],[28],[29],[30],[27],[19,18],[1]]
+	# cost = my_cost_model.calculate_cost_fair(partitions,workload)
 
 	partitions=sorted(partitions,key=lambda x:min(x))
 	
