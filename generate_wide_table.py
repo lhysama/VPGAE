@@ -12,7 +12,7 @@ def generate_random_str(length):
 
 	return random_str
 
-conn = psycopg2.connect(database="wide_test", user="postgres", password="your-password", host="127.0.0.1", port="5432")
+conn = psycopg2.connect(database="wide_test", user="your-user-name", password="your-password", host="127.0.0.1", port="5432")
 conn.autocommit = True
 cursor = conn.cursor()
 
