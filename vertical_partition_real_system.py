@@ -55,7 +55,7 @@ def include(list1,list2):
 def doPartitioningOnLineitemWithoutJoin(partitions,workload):
 	subtables = ["wide_table"+str(i) for i in range(len(partitions))]
 
-	conn = psycopg2.connect(database="wide_test", user="your-user-name", password="your-password", host="127.0.0.1", port="5432")
+	conn = psycopg2.connect(database="wide_test", user="postgres", password="lhy19990316", host="127.0.0.1", port="5432")
 	conn.autocommit = True
 	cursor = conn.cursor()
 
@@ -158,8 +158,8 @@ def doPartitioningOnLineitemWithoutJoin(partitions,workload):
 	pg_execution_time = 0
 	for sql in sql_list:
 		cursor.execute(sql)
-		# print(cursor.fetchall()[-1][0].split(" ")[1])
-		pg_execution_time += eval(cursor.fetchall()[-1][0].split(" ")[1])
+		# print(cursor.fetchall()[-1][0].split(" ")[2])
+		pg_execution_time += eval(cursor.fetchall()[-1][0].split(" ")[2])
 	print("execution time of workload on partitioned tables: {} (measured in Python)".format(time.time()-st))
 	print("execution time of workload on partitioned tables: {} (measured in pg)".format(pg_execution_time/1000))
 	
