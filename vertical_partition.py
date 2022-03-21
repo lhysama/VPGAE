@@ -1,12 +1,14 @@
 import time
 import dataset
+import math
+import my_cost_model
+import argparse
+
 import VPGAE
 import column
 import row
 import optimal
-import my_cost_model
 import hillclimb
-import argparse
 
 import numpy as np
 
@@ -48,8 +50,10 @@ def TPC_H_exp():
 		workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
 		vpgae_workload = VPGAE_Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
 
-		beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload=vpgae_workload,n_hid=4,n_dim=16,k=3,origin_candidate_length=3,beam_search_width=3)
-		kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE",workload=vpgae_workload,n_hid=4,n_dim=16,k=3)
+		num_node = vpgae_workload.affinity_matrix.shape[0]
+
+		beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload=vpgae_workload, n_hid=num_node, n_dim=2*num_node, k=2, origin_candidate_length=6, beam_search_width=3)
+		kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE",workload=vpgae_workload, n_hid=num_node, n_dim=2*num_node, k=2)
 		
 		hill_cost, hill_partitions = hillclimb.partition(workload=workload)
 		column_cost, column_partitions = column.partition(workload=workload)
@@ -180,8 +184,10 @@ def TPC_DS_exp():
 		workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
 		vpgae_workload = VPGAE_Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
 		
-		beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B", workload=vpgae_workload,n_hid=8, n_dim=32, k=3, origin_candidate_length=3,beam_search_width=3)
-		kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE", workload=vpgae_workload,n_hid=8, n_dim=32, k=3)
+		num_node = vpgae_workload.affinity_matrix.shape[0]
+
+		beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B", workload=vpgae_workload, n_hid=num_node, n_dim=2*num_node, k=2, origin_candidate_length=6, beam_search_width=3)
+		kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE", workload=vpgae_workload, n_hid=num_node, n_dim=2*num_node, k=2)
 		
 		hill_cost, hill_partitions = hillclimb.partition(workload=workload)
 		column_cost, column_partitions = column.partition(workload=workload)
@@ -345,19 +351,22 @@ def random_dataset_exp():
 		for i,data in enumerate(dataset_):
 			workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
 			vpgae_workload = VPGAE_Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
-			
+			num_node = vpgae_workload.affinity_matrix.shape[0]
+
 			t2=time.time()
-			kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE",workload = vpgae_workload,n_hid=64,n_dim=32,k=3)
+			kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE", workload=vpgae_workload, n_hid=num_node, n_dim=2*num_node, k=2)
 			kmeans_time=time.time()-t2
 			print("VPGAE cost:{}, time:{:.3f}".format(kmeans_cost,kmeans_time))
 
 			t1=time.time()
-			beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload = vpgae_workload,n_hid=64,n_dim=32,k=3,origin_candidate_length=3,beam_search_width=3)
+			beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B", workload=vpgae_workload, n_hid=num_node, n_dim=2*num_node, k=2, origin_candidate_length=6, beam_search_width=3)
+			# beam_cost, beam_partitions = 0,[]
 			beam_time=time.time()-t1
 			print("VPGAE-B cost:{}, time:{:.3f}".format(beam_cost,beam_time))
 			
 			t3=time.time()
 			hill_cost, hill_partitions = hillclimb.partition(workload=workload)
+			# hill_cost, hill_partitions = 0,[]
 			hill_time=time.time()-t3
 			print("HILLCLIMB cost:{}, time:{:.3f}".format(hill_cost,hill_time))
 			print("")
@@ -391,24 +400,31 @@ def random_dataset_exp():
 
 # HAP benchmark experiments
 def HAP_exp():
-	queries_number_list = [10,15,20]
+	queries_number_list = [19]
 	dataset_ = dataset.HAP_example(queries_number_list)
 	for i,data in enumerate(dataset_):
 		print("Workload has {} queries.".format(queries_number_list[i]))
 		workload = Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
 		vpgae_workload = VPGAE_Workload(data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8])
-		
+		num_node = vpgae_workload.affinity_matrix.shape[0]
+
 		t1=time.time()
-		kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE",workload=vpgae_workload,n_hid=16,n_dim=16,k=3)
+		kmeans_cost, kmeans_partitions = VPGAE.partition(algo_type="VPGAE", workload=vpgae_workload, n_hid=num_node, n_dim=2*num_node, k=2)
 		kmeans_time=time.time()-t1
 		print("VPGAE cost on HAP wide table (example):",kmeans_cost)
 		print("VPGAE time:{}".format(kmeans_time))
 
 		t2=time.time()
-		beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B",workload=vpgae_workload,n_hid=16,n_dim=16,k=3,origin_candidate_length=5,beam_search_width=5)
+		beam_cost, beam_partitions = VPGAE.partition(algo_type="VPGAE-B", workload=vpgae_workload, n_hid=num_node, n_dim=2*num_node, k=2, origin_candidate_length=6, beam_search_width=3)
 		beam_time = time.time()-t2
 		print("VPGAE-B cost on HAP wide table (example):",beam_cost)
 		print("VPGAE-B time:{}".format(beam_time))
+
+		column_cost, column_partitions = column.partition(workload=workload)
+		print("COLUMN layout cost on HAP wide table (example):",column_cost)
+
+		row_cost, row_partitions = row.partition(workload=workload)
+		print("ROW layout cost on HAP wide table (example):",row_cost)
 
 		t3=time.time()
 		hill_cost, hill_partitions = hillclimb.partition(workload=workload)
@@ -416,21 +432,18 @@ def HAP_exp():
 		print("HILLCLIMB cost on HAP wide table (example):",hill_cost)
 		print("HILLCLIMB time:{}".format(hill_time))
 
-		column_cost, column_partitions = column.partition(workload=workload)
-		print("COLUMN cost on HAP wide table (example):",column_cost)
-
 		print("--------------------")
 
 if __name__ == "__main__":
 	args = parser.parse_args()
 	dataset_name = args.dataset
-	if dataset_name == "TPC_H":
+	if dataset_name == "TPC-H":
 		TPC_H_exp()
-	elif dataset_name == "TPC_DS":
+	elif dataset_name == "TPC-DS":
 		TPC_DS_exp()
-	elif dataset_name == "random_dataset":
+	elif dataset_name == "random":
 		random_dataset_exp()
 	elif dataset_name == "HAP":
 		HAP_exp()
 	else:
-		raise ValueError("no such dataset, available options: \n1.TPC_H \n2.TPC_DS \n3.random_dataset \n4.HAP")
+		raise ValueError("no such dataset, available options: \n1.TPC-H \n2.TPC-DS \n3.random \n4.HAP")
