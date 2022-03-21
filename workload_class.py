@@ -5,16 +5,16 @@ import copy
 def usage_matrix_to_affinity_matrix(usage_matrix):
 	attribute_num = usage_matrix.shape[1] - 1
 	query_num = usage_matrix.shape[0]
-	affnity_matrix = np.zeros((attribute_num,attribute_num),dtype = np.float32)
+	affinity_matrix = np.zeros((attribute_num,attribute_num),dtype = np.float32)
 	for i in range(attribute_num):
 		for j in range(i,attribute_num):
 			temp = 0
 			for z in range(query_num):
 				if usage_matrix[z][i] == 1 and usage_matrix[z][j] == 1:
 					temp += usage_matrix[z][usage_matrix.shape[1] - 1]
-			affnity_matrix[i][j] = temp
-			affnity_matrix[j][i] = temp
-	return affnity_matrix
+			affinity_matrix[i][j] = temp
+			affinity_matrix[j][i] = temp
+	return affinity_matrix
 
 # Define workload profile class for VPGAE and VPGAE-B
 class VPGAE_Workload():
@@ -56,7 +56,7 @@ class VPGAE_Workload():
 
 		self.freq = np.array(frequence_list, dtype = np.float32)
 		self.new_usage_matrix[:,-1] = self.freq
-		self.affnity_matrix = usage_matrix_to_affinity_matrix(self.new_usage_matrix)
+		self.affinity_matrix = usage_matrix_to_affinity_matrix(self.new_usage_matrix)
 		
 		if selectivity_list != None:
 			self.selectivity = np.array(selectivity_list, dtype = np.float32)
@@ -117,7 +117,7 @@ class Workload():
 				self.usage_matrix[row][col-1] = 1.0
 		self.freq = np.array(frequence_list, dtype = np.float32)
 		self.usage_matrix[:,-1] = self.freq
-		self.affnity_matrix = usage_matrix_to_affinity_matrix(self.usage_matrix)
+		self.affinity_matrix = usage_matrix_to_affinity_matrix(self.usage_matrix)
 		
 		if selectivity_list != None:
 			self.selectivity = np.array(selectivity_list, dtype = np.float32)
